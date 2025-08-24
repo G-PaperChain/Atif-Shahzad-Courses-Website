@@ -14,12 +14,13 @@ const MidContent = () => {
     );
 
     useEffect(() => {
+        console.log("render hua bc")
         let timeout;
         if (typing) {
             if (displayed.length < words[wordIndex].length) {
                 timeout = setTimeout(() => {
                     setDisplayed(words[wordIndex].slice(0, displayed.length + 1));
-                }, 100);
+                }, 150);
             } else {
                 timeout = setTimeout(() => setTyping(false), 1200);
             }
@@ -27,7 +28,7 @@ const MidContent = () => {
             if (displayed.length > 0) {
                 timeout = setTimeout(() => {
                     setDisplayed(words[wordIndex].slice(0, displayed.length - 1));
-                }, 50);
+                }, 100);
             } else {
                 setTyping(true);
                 setWordIndex(prev => (prev + 1) % words.length);
