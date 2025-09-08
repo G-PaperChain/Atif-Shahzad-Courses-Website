@@ -1,32 +1,5 @@
-// import React from 'react'
-// import './Navbar.css'
-// import logo from '../assets/logo.png'
-// import { Link } from 'react-router-dom'
-
-// const Navbar = () => {
-//     return (
-//         <nav className="navbar"> 
-//             <div className="navbar-left">
-//                 <ul className="nav-links">
-//                     <Link to={"/tester"}><img src={logo} className="logo" /></Link>
-//                     <li className="navbar-item">Home</li>
-//                     <li className="navbar-item">Courses</li>
-//                     <li className="navbar-item">About</li>
-//                     <li className="navbar-item">Blog</li>
-//                 </ul>
-//             </div>
-//             <div className="navbar-right">
-//                 <button className="btn">Contact Us</button>
-//                 <button className="btn">Log In</button>
-//             </div>
-//         </nav>
-//     )
-// }
-
-// export default Navbar
-
 import React from 'react'
-import './Navbar.css'
+import '../Components/Components_CSS/Navbar.css'
 import logo from '../assets/logo.png'
 import { Link, NavLink } from 'react-router-dom'
 

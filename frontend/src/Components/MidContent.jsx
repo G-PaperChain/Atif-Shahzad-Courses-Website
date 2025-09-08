@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import './MidContent.css'
+import '../Components/Components_CSS/MidContent.css'
 
 const MidContent = () => {
     const words = ["learning", "growing", "coding", "exploring", "innovating", "succeeding"];
@@ -7,14 +7,12 @@ const MidContent = () => {
     const [displayed, setDisplayed] = useState("");
     const [typing, setTyping] = useState(true);
 
-    // Longest word for stable width
     const longestWordLength = useMemo(
         () => Math.max(...words.map(w => w.length)),
         [words]
     );
 
     useEffect(() => {
-        console.log("render hua bc")
         let timeout;
         if (typing) {
             if (displayed.length < words[wordIndex].length) {
