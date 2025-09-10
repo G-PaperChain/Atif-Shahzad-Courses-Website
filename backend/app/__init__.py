@@ -36,11 +36,11 @@ def create_app():
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
-    CORS(app, origins=['http://localhost:5173'])  # Update for production
+    CORS(app, resources={r"/*": {"origins": "https://dratifshahzad.com"}}) # change
     
     # Register blueprints
     from app.routes.auth import auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(auth_bp, url_prefix='/api')
     
     # Create tables
     with app.app_context():
