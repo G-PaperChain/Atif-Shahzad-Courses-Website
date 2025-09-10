@@ -1,11 +1,15 @@
 import Navbar from './components/Navbar'
-import { Outlet } from 'react-router-dom'
+import "./App.css"
+import MidContent from './Components/MidContent'
+import { AuthProvider } from './Components/AuthComponents/AuthContext';
 
 function App() {
   return (
     <>
-      <Navbar />
-      <Outlet /> 
+      <AuthProvider>
+        <Navbar />
+        <MidContent />
+      </AuthProvider>
     </>
   )
 }

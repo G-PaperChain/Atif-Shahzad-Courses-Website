@@ -1,30 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Sen:wght@400..800&display=swap');
-
-:root {
-    --l-green: #395b50;
-    --d-green: #1f2f16;
-    --l-blue: #92afd7;
-    --d-blue: #5a7684;
-    --l-l-blue: #c5d1eb;
-    --main-bg: #f9f9fb;
-    --main-text: #181c1f;
-    --midcontent-title: #1a144f;
-    --midcontent-title-dark: #e0e6fa; /* Softer, more readable blue for dark mode */
-}
-
-[data-theme="dark"] {
-    --main-bg: #181c1f;
-    --main-text: #f9f9fb;
-    --midcontent-title: var(--midcontent-title-dark);
-}
-
-* {
-    font-family: 'Sen', sans-serif;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 .typing-effect {
     display: inline-block;
     text-align: left;
@@ -47,11 +20,6 @@
     vertical-align: bottom; /* keeps aligned with text */
 }
 
-
-@keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-}
 
 /* Main container */
 .midcontent-container {
@@ -184,23 +152,4 @@
     width: 100%;
     user-select: none;
     -webkit-user-drag: none;
-}
-
-/* Fix theme toggle button position */
-.theme-toggle {
-    position: fixed;
-    top: 24px;
-    right: 32px;
-    z-index: 2000;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
-    transition: background 0.2s;
-}
-
-.theme-toggle:focus,
-.theme-toggle:hover {
-    background: rgba(60, 60, 100, 0.08);
 }
