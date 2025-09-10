@@ -28,7 +28,7 @@ const LoginDropdown = (props) => {
 
     return (
         <div
-            className='flex flex-col justify-center px-6 py-6 fixed right-16 top-16 bg-green-200 rounded-3xl z-50
+            className='flex flex-col justify-center px-6 py-6 fixed right-16 top-16 bg-green-200 rounded-lg z-50
             shadow-2xl border border-gray-800 w-80
             transition-all duration-300 ease-out transform'
         >

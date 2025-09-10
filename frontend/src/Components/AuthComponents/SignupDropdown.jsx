@@ -47,7 +47,7 @@ const SignupDropdown = (props) => {
 
     return (
         <div
-            className='flex flex-col justify-center px-6 py-6 fixed bg-custom-black rounded-3xl right-16 top-16 z-50
+            className='flex flex-col justify-center px-6 py-6 fixed rounded-lg right-16 top-16 z-50
             shadow-2xl border border-gray-800 w-80
             transition-all duration-300 ease-out transform bg-green-200'>
             <h2 className="mt-2 text-center text-xl font-bold tracking-tight z-50">
@@ -76,7 +76,7 @@ const SignupDropdown = (props) => {
                     </div>
 
                     <div>
-                        <label htmlFor="email" className="block text-sm font-medium  mb-2">
+                        <label htmlFor="email" className="block text-sm font-medium mb-2">
                             Email address
                         </label>
                         <input

@@ -2,23 +2,7 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: #fff   ;
+    background: #DBFCE7;
 }
 
-@theme {
-  /* --color-brand-primary: #2563EB;
-  --color-brand-primary-hover: #1D4ED8;
-  --color-brand-secondary: #F59E0B;
-  --color-brand-secondary-hover: #D97706;
-  --color-brand-success: #10B981;
-  --color-brand-success-hover: #059669;
-
-  --color-background: #F9FAFB;
-  --color-card: #FFFFFF;
-  --color-text: #111827;
-  --color-text-secondary: #6B7280;
-  --radius-radius: 6px;
-  --font-nav-lg: 15px;
-  --radius-rounded-full : 100%;
-  --color-offwhite: #FAF9F6; */
-}
+@theme {}
