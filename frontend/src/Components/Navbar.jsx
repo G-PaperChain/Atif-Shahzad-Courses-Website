@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { createPortal } from 'react-dom'
+import { createPortal} from 'react-dom'
 import LoginDropdown from '../Components/AuthComponents/LoginDropdown'
 import SignupDropdown from '../Components/AuthComponents/SignupDropdown'
 import { useAuth } from '../Components/AuthComponents/AuthContext';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth(); // Context
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false)
   const [showSignupDropdown, setShowSignupDropdown] = useState(false)
@@ -72,8 +73,8 @@ const Navbar = () => {
 
       <div className="navbar-left flex items-center list-none justify-center gap-16">
         <ul className="flex gap-9 items-center justify-center">
-          <li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Home</li>
-          <li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Courses</li>
+          <Link to={'/'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Home</li></Link>
+          <Link to={'/courses'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Courses</li></Link>
           <li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>About</li>
           <li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Contact</li>
         </ul>

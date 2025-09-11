@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // const API_BASE = 'http://localhost:5000/api/auth';
   const API_BASE = 'https://dratifshahzad.com/api/';
 
   useEffect(() => {

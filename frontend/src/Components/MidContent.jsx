@@ -68,9 +68,6 @@ const MidContent = () => {
                         "High-quality learning designed to help you achieve your personal and professional goals."
                     </p>
                     <button className=' bg-green-700 border-0 border-gray-900 py-2 px-4 rounded-radius hover:bg-green-800 cursor-pointer text-gray-50 text-lg transition-colors duration-200'
-                    onClick={
-                        console.log('s')
-                    }
                     >Get Started</button>
                 </div>
 

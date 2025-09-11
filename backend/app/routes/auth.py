@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from app import db, bcrypt
-from app.models import User
+from backend.app.models.User import User
 import re
 
 auth_bp = Blueprint('auth', __name__)
@@ -11,7 +11,6 @@ def validate_email(email):
     return re.match(pattern, email) is not None
 
 def validate_password(password):
-    # At least 8 characters, 1 uppercase, 1 lowercase, 1 number
     if len(password) < 8:
         return False
     if not re.search(r'[A-Z]', password):
@@ -91,7 +90,7 @@ def login():
         if not user.is_active:
             return jsonify({'error': 'Account deactivated'}), 401
         
-        access_token = create_access_token(identity=user.id)
+        access_token = create_access_token(identity=user.id, additional_claims={"role": user.role})
         refresh_token = create_refresh_token(identity=user.id)
         
         return jsonify({
