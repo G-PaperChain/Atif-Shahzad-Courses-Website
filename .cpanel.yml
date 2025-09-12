@@ -3,13 +3,14 @@ deployment:
     - export FRONTEND=/home/dratifshahzad/public_html
     - export BACKEND=/home/dratifshahzad/backendapp
 
-    # Frontend build and deploy
+    # FRONTEND BUILD
     - cd frontend
     - npm install
     - npm run build
     - rm -rf $FRONTEND/*
     - cp -R dist/* $FRONTEND/
 
-    # Backend deploy
+    # BACKEND COPY
+    - cd ..
     - rm -rf $BACKEND/*
-    - cp -R backend/. $BACKEND/
+    - cp -R backend/* $BACKEND/
