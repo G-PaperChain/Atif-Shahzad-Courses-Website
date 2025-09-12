@@ -1,14 +1,10 @@
 deployment:
   tasks:
-    # Where your website files should go (public_html is default for the domain)
     - export DEPLOYPATH=/home/dratifshahzad/public_html  
 
-    # Clear old frontend build
     - /bin/rm -rf $DEPLOYPATH/*  
 
-    # Copy React build output into public_html
-    - /bin/cp -R frontend/build/* $DEPLOYPATH/  
+    - /bin/cp -R frontend/dist/* $DEPLOYPATH/  
 
-    # Copy backend into a subfolder (so Python app can run it)
     - /bin/mkdir -p /home/dratifshahzad/backend
     - /bin/cp -R backend/* /home/dratifshahzad/backend/
