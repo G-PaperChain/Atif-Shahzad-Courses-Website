@@ -1,10 +1,13 @@
+---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/dratifshahzad/public_html  
+    - export DEPLOYPATH=/home/dratifshahzad/public_html
+    - /bin/rm -rf $DEPLOYPATH/*
 
-    - /bin/rm -rf $DEPLOYPATH/*  
+    # copy frontend (Vite -> dist)
+    - /bin/cp -R frontend/dist/* $DEPLOYPATH/
 
-    - /bin/cp -R frontend/dist/* $DEPLOYPATH/  
-
+    # copy backend to a separate folder (python app will use this)
     - /bin/mkdir -p /home/dratifshahzad/backend
+    - /bin/rm -rf /home/dratifshahzad/backend/*
     - /bin/cp -R backend/* /home/dratifshahzad/backend/
