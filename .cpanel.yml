@@ -1,9 +1,15 @@
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/dratifshahzad/public_html
-    # Clear old frontend
-    - /bin/rm -rf $DEPLOYPATH/*
-    # Copy React build
-    - /bin/cp -R frontend/dist/* $DEPLOYPATH/
-    # Copy backend (Flask app files, not venv)
-    - /bin/cp -R backend $DEPLOYPATH/backend
+    - export FRONTENDPATH=/home/dratifshahzad/public_html
+    - export BACKENDPATH=/home/dratifshahzad/backendapp
+
+    # Deploy frontend
+    - cd frontend
+    - npm install
+    - npm run build
+    - rm -rf $FRONTENDPATH/*
+    - cp -R dist/* $FRONTENDPATH/
+
+    # Deploy backend
+    - rm -rf $BACKENDPATH/*
+    - cp -R backend/* $BACKENDPATH/
