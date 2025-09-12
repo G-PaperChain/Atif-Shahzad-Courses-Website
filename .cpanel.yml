@@ -12,4 +12,4 @@ deployment:
 
     # Backend deploy
     - rm -rf $BACKEND/*
-    - cp -R backend/* $BACKEND/
+    - cp -R backend/. $BACKEND/
