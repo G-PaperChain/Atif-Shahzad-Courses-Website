@@ -1,13 +1,9 @@
----
 deployment:
   tasks:
     - export DEPLOYPATH=/home/dratifshahzad/public_html
+    # Clear old frontend
     - /bin/rm -rf $DEPLOYPATH/*
-
-    # copy frontend (Vite -> dist)
+    # Copy React build
     - /bin/cp -R frontend/dist/* $DEPLOYPATH/
-
-    # copy backend to a separate folder (python app will use this)
-    - /bin/mkdir -p /home/dratifshahzad/backend
-    - /bin/rm -rf /home/dratifshahzad/backend/*
-    - /bin/cp -R backend/* /home/dratifshahzad/backend/
+    # Copy backend (Flask app files, not venv)
+    - /bin/cp -R backend $DEPLOYPATH/backend
