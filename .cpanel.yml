@@ -1,15 +1,15 @@
 deployment:
   tasks:
-    - export FRONTENDPATH=/home/dratifshahzad/public_html
-    - export BACKENDPATH=/home/dratifshahzad/backendapp
+    - export FRONTEND=/home/dratifshahzad/public_html
+    - export BACKEND=/home/dratifshahzad/backendapp
 
-    # Deploy frontend
+    # Frontend build and deploy
     - cd frontend
     - npm install
     - npm run build
-    - rm -rf $FRONTENDPATH/*
-    - cp -R dist/* $FRONTENDPATH/
+    - rm -rf $FRONTEND/*
+    - cp -R dist/* $FRONTEND/
 
-    # Deploy backend
-    - rm -rf $BACKENDPATH/*
-    - cp -R backend/* $BACKENDPATH/
+    # Backend deploy
+    - rm -rf $BACKEND/*
+    - cp -R backend/* $BACKEND/
