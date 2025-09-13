@@ -8,8 +8,8 @@ deployment:
     # Copy Flask backend files to Python app directory
     - /bin/cp -R backend/* $FLASK_PATH/
     
-    # Copy built React files to public_html
-    - /bin/cp -R dist/* $PUBLIC_PATH/
+    # Copy built React files to public_html - FIXED PATH!
+    - /bin/cp -R frontend/dist/* $PUBLIC_PATH/
     
     # Install Python dependencies
     - cd $FLASK_PATH && python -m pip install -r requirements.txt
