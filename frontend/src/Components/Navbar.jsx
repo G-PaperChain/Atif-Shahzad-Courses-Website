@@ -6,7 +6,7 @@ import { useAuth } from '../Components/AuthComponents/AuthContext';
 import { Link } from 'react-router-dom';
 
 const Navbar = () => {
-  const { user, logout } = useAuth(); // Context
+  const { user, logout } = useAuth(); 
 
   const [showLoginDropdown, setShowLoginDropdown] = useState(false)
   const [showSignupDropdown, setShowSignupDropdown] = useState(false)
@@ -62,9 +62,6 @@ const Navbar = () => {
       document.removeEventListener('keydown', handleEsc)
     }
   }, [showLoginDropdown, showSignupDropdown])
-
-
-  console.log("BHAI MAIN KAAM KAR RAHA HOON!!!!!")
 
   return (
 

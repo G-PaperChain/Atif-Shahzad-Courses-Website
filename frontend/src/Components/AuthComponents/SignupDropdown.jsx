@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { IoTriangle } from "react-icons/io5";
 import { useAuth } from '../AuthComponents/AuthContext';
 
 const SignupDropdown = (props) => {
