@@ -1,0 +1,32 @@
+---
+deployment:
+  tasks:
+    # Install Python dependencies
+    - export DEPLOYPATH=/home/dratifshahzad/public_html
+    - /bin/cp -R backend/* $DEPLOYPATH/
+    
+    # Copy built React files to public_html
+    - /bin/cp -R frontend/dist/* $DEPLOYPATH/
+    
+    # Install Flask dependencies (if pip is available)
+    - cd $DEPLOYPATH && python3 -m pip install --user -r requirements.txt
+    
+    # Set proper permissions
+    - find $DEPLOYPATH -type f -exec chmod 644 {} \;
+    - find $DEPLOYPATH -type d -exec chmod 755 {} \;
+    
+    # Create .htaccess for React routing and Flask
+    - |
+      cat > $DEPLOYPATH/.htaccess << 'EOF'
+      RewriteEngine On
+      
+      # Handle Flask API routes
+      RewriteCond %{REQUEST_URI} ^/api/
+      RewriteRule ^api/(.*)$ app.py/$1 [L,QSA]
+      
+      # Handle React routing - send everything else to index.html
+      RewriteCond %{REQUEST_FILENAME} !-f
+      RewriteCond %{REQUEST_FILENAME} !-d
+      RewriteCond %{REQUEST_URI} !^/api/
+      RewriteRule . /index.html [L]
+      EOF
