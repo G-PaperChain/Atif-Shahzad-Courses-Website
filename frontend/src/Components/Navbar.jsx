@@ -63,6 +63,9 @@ const Navbar = () => {
     }
   }, [showLoginDropdown, showSignupDropdown])
 
+
+  console.log("BHAI MAIN KAAM KAR RAHA HOON!!!!!")
+
   return (
 
     <nav className="navbar grid grid-cols-3 justify-around items-center sticky top-0 p-3 bg-red-100 z-50">
