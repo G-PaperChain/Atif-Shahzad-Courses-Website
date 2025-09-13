@@ -1,18 +1,43 @@
 ---
 deployment:
   tasks:
-    - echo "=== cPanel deploy started ==="
-
-    # Frontend build → public_html
-    - echo "Deploying React frontend..."
-    - /bin/rsync -av --delete frontend/dist/ /home/dratifshahzad/public_html/
-
-    # Backend → Python App root
-    - echo "Deploying Flask backend..."
-    - /bin/rsync -av --delete backend/ /home/dratifshahzad/pythonapps/main-web-backend
-
-    # Restart Passenger for backend
-    - /bin/mkdir -p /home/dratifshahzad/pythonapps/main-web-backend
-    - /usr/bin/touch /home/dratifshahzad/pythonapps/main-web-backend/tmp/restart.txt
-
-    - echo "=== cPanel deploy finished ==="
+    # Install Python dependencies for Flask backend
+    - export DEPLOYPATH=/home/dratifshahzad/public_html/
+    - /bin/cp -R backend $DEPLOYPATH
+    - /bin/cp -R frontend $DEPLOYPATH
+    
+    # Install backend dependencies
+    - cd $DEPLOYPATH/backend
+    - python3 -m pip install --user -r requirements.txt
+    
+    # Build React frontend
+    - cd $DEPLOYPATH/frontend
+    - npm install
+    - npm run build
+    
+    # Copy built React files to public directory
+    - /bin/cp -R $DEPLOYPATH/frontend/dist/* $DEPLOYPATH/public_html/
+    
+    # Set up Flask app
+    - cd $DEPLOYPATH
+    - /bin/cp backend/run.py ./
+    
+    # Create passenger_wsgi.py for cPanel
+    - |
+      cat > $DEPLOYPATH/passenger_wsgi.py << 'EOF'
+      import sys
+      import os
+      
+      # Add your project directory to sys.path
+      sys.path.insert(0, os.path.dirname(__file__))
+      sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
+      
+      from run import app as application
+      
+      if __name__ == "__main__":
+          application.run()
+      EOF
+    
+    # Set permissions
+    - find $DEPLOYPATH -type f -name "*.py" -exec chmod 644 {} \;
+    - chmod 755 $DEPLOYPATH/passenger_wsgi.py
