@@ -10,8 +10,11 @@ deployment:
     # Copy backend files
     - /bin/cp -R backend $DEPLOYPATH/
     
-    # Copy pre-built React files directly from dist folder
-    - /bin/cp -R frontend/dist/* $DEPLOYPATH/
+    # Check if dist folder exists and copy React files
+    - ls -la frontend/
+    - ls -la frontend/dist/ || echo "ERROR: No dist folder found!"
+    - /bin/cp -R frontend/dist/* $DEPLOYPATH/ || echo "ERROR: Failed to copy dist files"
+    - ls -la $DEPLOYPATH/ | head -20
     
     # Install Python dependencies
     - cd $DEPLOYPATH/backend && /usr/local/bin/python3.9 -m pip install --user -r requirements.txt
