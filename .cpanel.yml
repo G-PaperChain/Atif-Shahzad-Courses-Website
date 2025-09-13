@@ -1,74 +1,18 @@
 ---
 deployment:
   tasks:
-    # Debug: Check what we have
-    - pwd
-    - ls -la
-    - ls -la frontend/
-    - ls -la frontend/dist/ || echo "No dist folder"
-    
-    # Set deployment path
     - export DEPLOYPATH=/home/dratifshahzad/public_html
-    
-    # Clean up old files
-    - rm -f $DEPLOYPATH/index.html
-    - rm -rf $DEPLOYPATH/assets
-    - rm -rf $DEPLOYPATH/backend
-    - rm -rf $DEPLOYPATH/myapp
-    
-    # Copy backend
-    - cp -R backend $DEPLOYPATH/
-    
-    # Copy React built files (try multiple methods)
-    - test -d frontend/dist && echo "Dist folder exists" || echo "No dist folder!"
-    - test -f frontend/dist/index.html && echo "index.html exists" || echo "No index.html!"
-    
-    # Method 1: Copy individual files
-    - cp frontend/dist/index.html $DEPLOYPATH/ || echo "Failed method 1"
-    - cp -R frontend/dist/assets $DEPLOYPATH/ || echo "No assets folder"
-    
-    # Install Python dependencies
-    - cd $DEPLOYPATH/backend
-    - python3.9 -m pip install --user -r requirements.txt
-    
-    # Create Python app directory
+    - /bin/cp -R backend $DEPLOYPATH/
+    - /bin/cp frontend/dist/index.html $DEPLOYPATH/
+    - /bin/cp -R frontend/dist/assets $DEPLOYPATH/
+    - cd $DEPLOYPATH/backend && python3.9 -m pip install --user -r requirements.txt
     - mkdir -p $DEPLOYPATH/myapp
-    - cp -R $DEPLOYPATH/backend $DEPLOYPATH/myapp/
-    
-    # Create passenger_wsgi.py
-    - |
-      cat > $DEPLOYPATH/myapp/passenger_wsgi.py << 'EOF'
-      import sys
-      import os
-      
-      sys.path.insert(0, os.path.dirname(__file__))
-      sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
-      
-      os.environ.setdefault('SECRET_KEY', 'prod-secret-key')
-      os.environ.setdefault('JWT_SECRET_KEY', 'prod-jwt-secret')
-      os.environ.setdefault('DATABASE_URL', 'sqlite:///app.db')
-      
-      from app import create_app
-      application = create_app()
-      EOF
-    
-    # Create .htaccess
-    - |
-      cat > $DEPLOYPATH/.htaccess << 'EOF'
-      RewriteEngine On
-      RewriteCond %{REQUEST_URI} ^/api/.*
-      RewriteRule ^api/(.*)$ /myapp/api/$1 [L,QSA]
-      RewriteCond %{REQUEST_FILENAME} !-f
-      RewriteCond %{REQUEST_FILENAME} !-d
-      RewriteCond %{REQUEST_URI} !^/api/.*
-      RewriteRule . /index.html [L]
-      EOF
-    
-    # Set permissions
-    - chmod 644 $DEPLOYPATH/myapp/passenger_wsgi.py
-    - chmod 644 $DEPLOYPATH/.htaccess
-    - chmod 644 $DEPLOYPATH/index.html
-    
-    # Debug: Check final result
-    - ls -la $DEPLOYPATH/
-    - echo "Deployment complete"
+    - /bin/cp -R $DEPLOYPATH/backend $DEPLOYPATH/myapp/
+    - echo 'import sys, os; sys.path.insert(0, os.path.dirname(__file__)); sys.path.insert(0, os.path.join(os.path.dirname(__file__), "backend")); os.environ.setdefault("SECRET_KEY", "prod-secret"); os.environ.setdefault("JWT_SECRET_KEY", "jwt-secret"); os.environ.setdefault("DATABASE_URL", "sqlite:///app.db"); from app import create_app; application = create_app()' > $DEPLOYPATH/myapp/passenger_wsgi.py
+    - echo 'RewriteEngine On' > $DEPLOYPATH/.htaccess
+    - echo 'RewriteCond %{REQUEST_URI} ^/api/.*' >> $DEPLOYPATH/.htaccess
+    - echo 'RewriteRule ^api/(.*)$ /myapp/api/$1 [L,QSA]' >> $DEPLOYPATH/.htaccess
+    - echo 'RewriteCond %{REQUEST_FILENAME} !-f' >> $DEPLOYPATH/.htaccess
+    - echo 'RewriteCond %{REQUEST_FILENAME} !-d' >> $DEPLOYPATH/.htaccess
+    - echo 'RewriteCond %{REQUEST_URI} !^/api/.*' >> $DEPLOYPATH/.htaccess
+    - echo 'RewriteRule . /index.html [L]' >> $DEPLOYPATH/.htaccess
