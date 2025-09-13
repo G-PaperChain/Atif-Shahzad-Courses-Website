@@ -3,28 +3,29 @@ deployment:
   tasks:
     - export FLASK_PATH=/home/dratifshahzad/myapp
     - export PUBLIC_PATH=/home/dratifshahzad/public_html
-
+    
     - /bin/cp -R backend/* $FLASK_PATH/
     - /bin/cp -R frontend/dist/* $PUBLIC_PATH/
-
+    
     - cd $FLASK_PATH && python -m pip install -r requirements.txt
-
+    
     - mkdir -p $FLASK_PATH/tmp
     - touch $FLASK_PATH/tmp/restart.txt
-
+    
     - find $FLASK_PATH -type f -exec chmod 644 {} \;
     - find $FLASK_PATH -type d -exec chmod 755 {} \;
     - find $PUBLIC_PATH -type f -exec chmod 644 {} \;
     - find $PUBLIC_PATH -type d -exec chmod 755 {} \;
-
-    - echo "RewriteEngine On" > $PUBLIC_PATH/.htaccess
-    - echo "" >> $PUBLIC_PATH/.htaccess
-    - echo "# Handle API routes - proxy to Flask app" >> $PUBLIC_PATH/.htaccess
-    - echo "RewriteCond %{REQUEST_URI} ^/api/" >> $PUBLIC_PATH/.htaccess
-    - echo "RewriteRule ^api/(.*)$ /cgi-bin/myapp/\$1 [L,P,QSA]" >> $PUBLIC_PATH/.htaccess
-    - echo "" >> $PUBLIC_PATH/.htaccess
-    - echo "# Handle React routing - everything else goes to index.html" >> $PUBLIC_PATH/.htaccess
-    - echo "RewriteCond %{REQUEST_FILENAME} !-f" >> $PUBLIC_PATH/.htaccess
-    - echo "RewriteCond %{REQUEST_FILENAME} !-d" >> $PUBLIC_PATH/.htaccess
-    - echo "RewriteCond %{REQUEST_URI} !^/api/" >> $PUBLIC_PATH/.htaccess
-    - echo "RewriteRule . /index.html [L]" >> $PUBLIC_PATH/.htaccess
+    
+    - |
+      cat > $PUBLIC_PATH/.htaccess << 'EOF'
+      RewriteEngine On
+      
+      RewriteCond %{REQUEST_URI} ^/api/
+      RewriteRule ^api/(.*)$ /cgi-bin/myapp/$1 [L,P,QSA]
+      
+      RewriteCond %{REQUEST_FILENAME} !-f
+      RewriteCond %{REQUEST_FILENAME} !-d
+      RewriteCond %{REQUEST_URI} !^/api/
+      RewriteRule . /index.html [L]
+      EOF
