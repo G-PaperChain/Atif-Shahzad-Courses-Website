@@ -1,30 +1,39 @@
 ---
 deployment:
   tasks:
-    # Install Python dependencies
-    - export DEPLOYPATH=/home/dratifshahzad/public_html
-    - /bin/cp -R backend/* $DEPLOYPATH/
+    # Set deployment paths
+    - export FLASK_PATH=/home/dratifshahzad/myapp
+    - export PUBLIC_PATH=/home/dratifshahzad/public_html
+    
+    # Copy Flask backend files to Python app directory
+    - /bin/cp -R backend/* $FLASK_PATH/
     
     # Copy built React files to public_html
-    - /bin/cp -R frontend/dist/* $DEPLOYPATH/
+    - /bin/cp -R dist/* $PUBLIC_PATH/
     
-    # Install Flask dependencies (if pip is available)
-    - cd $DEPLOYPATH && python3 -m pip install --user -r requirements.txt
+    # Install Python dependencies
+    - cd $FLASK_PATH && python -m pip install -r requirements.txt
     
-    # Set proper permissions
-    - find $DEPLOYPATH -type f -exec chmod 644 {} \;
-    - find $DEPLOYPATH -type d -exec chmod 755 {} \;
+    # Restart the Python application (CRITICAL!)
+    - mkdir -p $FLASK_PATH/tmp
+    - touch $FLASK_PATH/tmp/restart.txt
     
-    # Create .htaccess for React routing and Flask
+    # Set proper file permissions
+    - find $FLASK_PATH -type f -exec chmod 644 {} \;
+    - find $FLASK_PATH -type d -exec chmod 755 {} \;
+    - find $PUBLIC_PATH -type f -exec chmod 644 {} \;
+    - find $PUBLIC_PATH -type d -exec chmod 755 {} \;
+    
+    # Create .htaccess for routing
     - |
-      cat > $DEPLOYPATH/.htaccess << 'EOF'
+      cat > $PUBLIC_PATH/.htaccess << 'EOF'
       RewriteEngine On
       
-      # Handle Flask API routes
+      # Handle API routes - proxy to Flask app
       RewriteCond %{REQUEST_URI} ^/api/
-      RewriteRule ^api/(.*)$ app.py/$1 [L,QSA]
+      RewriteRule ^api/(.*)$ /cgi-bin/myapp/$1 [L,P,QSA]
       
-      # Handle React routing - send everything else to index.html
+      # Handle React routing - everything else goes to index.html
       RewriteCond %{REQUEST_FILENAME} !-f
       RewriteCond %{REQUEST_FILENAME} !-d
       RewriteCond %{REQUEST_URI} !^/api/
