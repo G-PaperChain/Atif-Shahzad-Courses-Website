@@ -1,47 +1,36 @@
 ---
 deployment:
   tasks:
-    # Set deployment path
-    - export DEPLOYPATH=/home/dratifshahzad/public_html
+    # Set deployment path to a subdirectory
+    - export DEPLOYPATH=/home/dratifshahzad/public_html/flask_backend
+    - mkdir -p $DEPLOYPATH
     
     # Copy backend and frontend
     - /bin/cp -R backend $DEPLOYPATH/
     - /bin/cp -R frontend $DEPLOYPATH/
     
-    # Install backend dependencies with user flag
+    # Install backend dependencies
     - cd $DEPLOYPATH/backend && /usr/local/bin/python3.9 -m pip install --user -r requirements.txt
     
-    # Install frontend dependencies and build
+    # Build React app
     - cd $DEPLOYPATH/frontend && npm install && npm run build
     
-    # Copy React build to the root public_html (not inside another folder)
-    - /bin/cp -R $DEPLOYPATH/frontend/dist/* $DEPLOYPATH/
+    # Copy React build to main public_html root (for the frontend)
+    - /bin/cp -R $DEPLOYPATH/frontend/dist/* /home/dratifshahzad/public_html/
     
-    # Create passenger_wsgi.py in root
+    # Create passenger_wsgi.py in the app directory
     - |
       cat > $DEPLOYPATH/passenger_wsgi.py << 'EOF'
       import sys
       import os
       
-      # Add paths
       sys.path.insert(0, os.path.dirname(__file__))
       sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
-      
-      # Set environment variables for production
-      os.environ.setdefault('SECRET_KEY', 'production-secret-key-change-this')
-      os.environ.setdefault('JWT_SECRET_KEY', 'production-jwt-secret-change-this')
-      os.environ.setdefault('DATABASE_URL', 'sqlite:///app.db')
-      
+
       from app import create_app
       application = create_app()
-      
-      if __name__ == "__main__":
-          application.run()
       EOF
     
-    # Set proper permissions
+    # Set permissions
     - find $DEPLOYPATH -type f -name "*.py" -exec chmod 644 {} \;
     - chmod 644 $DEPLOYPATH/passenger_wsgi.py
-    
-    # Initialize database
-    - cd $DEPLOYPATH/backend && /usr/local/bin/python3.9 -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all()"
