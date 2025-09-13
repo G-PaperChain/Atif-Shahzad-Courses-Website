@@ -2,27 +2,17 @@
 deployment:
   tasks:
     - echo "=== cPanel deploy started ==="
-    # where to publish your static site (change user)
-    - export DEPLOYPATH=/home/dratifshahzad/public_html/
-    - echo "publishing frontend (Vite) to $DEPLOYPATH"
 
-    # build frontend (Vite)
-    - cd frontend
-    - if [ -x "$(command -v npm)" ]; then /usr/bin/npm ci || /usr/bin/npm install; /usr/bin/npm run build; else echo "npm not found; please build locally or install node on server"; fi
-    - cd ..
+    # Frontend build → public_html
+    - echo "Deploying React frontend..."
+    - /bin/rsync -av --delete frontend/dist/ /home/dratifshahzad/public_html/
 
-    # sync the built site (Vite default output is 'dist')
-    - /bin/mkdir -p $DEPLOYPATH
-    - /usr/bin/rsync -av --delete frontend/dist/ $DEPLOYPATH
+    # Backend → Python App root
+    - echo "Deploying Flask backend..."
+    - /bin/rsync -av --delete backend/ /home/dratifshahzad/apps/myflask/
 
-    # deploy backend to the Python App root you created earlier
-    - echo "copying backend to python app root"
-    - export PYAPP_PATH=/home/dratifshahzad/pythonapps/main-web-backend  # <-- set this to the Application Root you configured
-    - /bin/mkdir -p $PYAPP_PATH
-    - /usr/bin/rsync -av --delete backend/ $PYAPP_PATH/
-
-    # restart passenger (touch restart file inside the app's tmp directory)
-    - /bin/mkdir -p $PYAPP_PATH/tmp
-    - /usr/bin/touch $PYAPP_PATH/tmp/restart.txt
+    # Restart Passenger for backend
+    - /bin/mkdir -p /home/dratifshahzad/pythonapps/main-web-backend
+    - /usr/bin/touch /home/dratifshahzad/pythonapps/main-web-backend/tmp/restart.txt
 
     - echo "=== cPanel deploy finished ==="
