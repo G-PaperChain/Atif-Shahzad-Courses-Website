@@ -65,7 +65,7 @@ const Navbar = () => {
 
   return (
 
-    <nav className="navbar grid grid-cols-3 justify-around items-center sticky top-0 p-3 bg-red-100 z-50">
+    <nav className="navbar grid grid-cols-3 justify-around items-center sticky top-0 p-3 bg-green-100 z-50">
 
       <div className='text-2xl font-extrabold flex justify-center text-green-700'>
         <h1 className='select-none'>Dr. Atif Shahzad</h1>
