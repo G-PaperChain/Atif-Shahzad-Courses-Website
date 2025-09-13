@@ -1,41 +1,30 @@
 ---
 deployment:
   tasks:
-    # Set deployment paths
     - export FLASK_PATH=/home/dratifshahzad/myapp
     - export PUBLIC_PATH=/home/dratifshahzad/public_html
-    
-    # Copy Flask backend files to Python app directory
+
     - /bin/cp -R backend/* $FLASK_PATH/
-    
-    # Copy built React files to public_html - FIXED PATH!
     - /bin/cp -R frontend/dist/* $PUBLIC_PATH/
-    
-    # Install Python dependencies
+
     - cd $FLASK_PATH && python -m pip install -r requirements.txt
-    
-    # Restart the Python application (CRITICAL!)
+
     - mkdir -p $FLASK_PATH/tmp
     - touch $FLASK_PATH/tmp/restart.txt
-    
-    # Set proper file permissions
+
     - find $FLASK_PATH -type f -exec chmod 644 {} \;
     - find $FLASK_PATH -type d -exec chmod 755 {} \;
     - find $PUBLIC_PATH -type f -exec chmod 644 {} \;
     - find $PUBLIC_PATH -type d -exec chmod 755 {} \;
-    
-    # Create .htaccess for routing
-    - |
-      cat > $PUBLIC_PATH/.htaccess << 'EOF'
-      RewriteEngine On
-      
-      # Handle API routes - proxy to Flask app
-      RewriteCond %{REQUEST_URI} ^/api/
-      RewriteRule ^api/(.*)$ /cgi-bin/myapp/$1 [L,P,QSA]
-      
-      # Handle React routing - everything else goes to index.html
-      RewriteCond %{REQUEST_FILENAME} !-f
-      RewriteCond %{REQUEST_FILENAME} !-d
-      RewriteCond %{REQUEST_URI} !^/api/
-      RewriteRule . /index.html [L]
-      EOF
+
+    - echo "RewriteEngine On" > $PUBLIC_PATH/.htaccess
+    - echo "" >> $PUBLIC_PATH/.htaccess
+    - echo "# Handle API routes - proxy to Flask app" >> $PUBLIC_PATH/.htaccess
+    - echo "RewriteCond %{REQUEST_URI} ^/api/" >> $PUBLIC_PATH/.htaccess
+    - echo "RewriteRule ^api/(.*)$ /cgi-bin/myapp/\$1 [L,P,QSA]" >> $PUBLIC_PATH/.htaccess
+    - echo "" >> $PUBLIC_PATH/.htaccess
+    - echo "# Handle React routing - everything else goes to index.html" >> $PUBLIC_PATH/.htaccess
+    - echo "RewriteCond %{REQUEST_FILENAME} !-f" >> $PUBLIC_PATH/.htaccess
+    - echo "RewriteCond %{REQUEST_FILENAME} !-d" >> $PUBLIC_PATH/.htaccess
+    - echo "RewriteCond %{REQUEST_URI} !^/api/" >> $PUBLIC_PATH/.htaccess
+    - echo "RewriteRule . /index.html [L]" >> $PUBLIC_PATH/.htaccess
