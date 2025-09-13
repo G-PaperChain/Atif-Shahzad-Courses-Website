@@ -9,7 +9,7 @@ deployment:
 
     # Backend → Python App root
     - echo "Deploying Flask backend..."
-    - /bin/rsync -av --delete backend/ /home/dratifshahzad/apps/myflask/
+    - /bin/rsync -av --delete backend/ /home/dratifshahzad/pythonapps/main-web-backend
 
     # Restart Passenger for backend
     - /bin/mkdir -p /home/dratifshahzad/pythonapps/main-web-backend
