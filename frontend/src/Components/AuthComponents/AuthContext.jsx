@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE = 'https://dratifshahzad.com/api/';
+  const API_BASE = 'https://dratifshahzad.com';
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
