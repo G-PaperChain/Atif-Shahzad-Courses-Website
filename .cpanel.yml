@@ -4,43 +4,38 @@ deployment:
     # Set deployment path
     - export DEPLOYPATH=/home/dratifshahzad/public_html
     
-    # Clean up old files first
-    - rm -rf $DEPLOYPATH/backend $DEPLOYPATH/frontend $DEPLOYPATH/src $DEPLOYPATH/assets
+    # Clean up old deployment files
+    - rm -rf $DEPLOYPATH/backend $DEPLOYPATH/myapp $DEPLOYPATH/assets $DEPLOYPATH/index.html
     
-    # Copy source files
+    # Copy backend files
     - /bin/cp -R backend $DEPLOYPATH/
-    - /bin/cp -R frontend $DEPLOYPATH/
     
-    # Install backend dependencies
+    # Copy pre-built React files directly from dist folder
+    - /bin/cp -R frontend/dist/* $DEPLOYPATH/
+    
+    # Install Python dependencies
     - cd $DEPLOYPATH/backend && /usr/local/bin/python3.9 -m pip install --user -r requirements.txt
     
-    # Install frontend dependencies and build (with error checking)
-    - cd $DEPLOYPATH/frontend
-    - npm install --production=false
-    - npm run build || (echo "React build failed!" && exit 1)
-    # Debug: Check if build was successful
-    - ls -la $DEPLOYPATH/frontend/dist/ || echo "Dist folder not found!"
-    
-    # Copy ONLY the built files from dist folder to root
-    - if [ -d "$DEPLOYPATH/frontend/dist" ]; then /bin/cp -R $DEPLOYPATH/frontend/dist/* $DEPLOYPATH/; else echo "Build failed - no dist folder"; exit 1; fi
-    
-    # Remove source files from public directory (security)
-    - rm -rf $DEPLOYPATH/frontend $DEPLOYPATH/src
-    
-    # Create Python app in subdirectory
+    # Create Python app directory
     - mkdir -p $DEPLOYPATH/myapp
     - /bin/cp -R $DEPLOYPATH/backend $DEPLOYPATH/myapp/
     
-    # Create passenger_wsgi.py for Python app
+    # Create passenger_wsgi.py for the Python app
     - |
       cat > $DEPLOYPATH/myapp/passenger_wsgi.py << 'EOF'
       import sys
       import os
       
-      # Add paths
+      # Add project paths to Python path
       sys.path.insert(0, os.path.dirname(__file__))
       sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
       
+      # Set environment variables for production
+      os.environ.setdefault('SECRET_KEY', 'your-production-secret-key-here')
+      os.environ.setdefault('JWT_SECRET_KEY', 'your-production-jwt-secret-here')
+      os.environ.setdefault('DATABASE_URL', 'sqlite:///app.db')
+      
+      # Import Flask app
       from app import create_app
       application = create_app()
       
@@ -48,26 +43,27 @@ deployment:
           application.run()
       EOF
     
-    # Create .htaccess for React Router (SPA support)
+    # Create .htaccess for routing
     - |
       cat > $DEPLOYPATH/.htaccess << 'EOF'
       RewriteEngine On
       
-      # Handle API requests - send to Python app
+      # Route API requests to Python app
       RewriteCond %{REQUEST_URI} ^/api/.*
-      RewriteRule ^(.*)$ /myapp/$1 [L,QSA]
+      RewriteRule ^api/(.*)$ /myapp/api/$1 [L,QSA]
       
-      # Handle React Router - all other requests go to index.html
+      # Handle React Router - send all other requests to index.html
       RewriteCond %{REQUEST_FILENAME} !-f
       RewriteCond %{REQUEST_FILENAME} !-d
       RewriteCond %{REQUEST_URI} !^/api/.*
       RewriteRule . /index.html [L]
       EOF
     
-    # Set permissions
+    # Set proper file permissions
     - find $DEPLOYPATH/myapp -type f -name "*.py" -exec chmod 644 {} \;
     - chmod 644 $DEPLOYPATH/myapp/passenger_wsgi.py
     - chmod 644 $DEPLOYPATH/.htaccess
+    - chmod 644 $DEPLOYPATH/index.html
     
-    # Initialize database
-    - cd $DEPLOYPATH/myapp/backend && /usr/local/bin/python3.9 -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all()" || echo "DB init failed - will try later"
+    # Initialize database (create tables)
+    - cd $DEPLOYPATH/myapp/backend && /usr/local/bin/python3.9 -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all()" || echo "Database initialization will be done manually"
