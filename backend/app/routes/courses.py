@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
-from app import db, bcrypt
-from backend.app.models.Course import Course
-from services.utils import admin_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app import db
+from app.models.Course import Course  # FIXED IMPORT PATH
+from app.services.utils import admin_required  # FIXED IMPORT PATH
 
 courses_bp = Blueprint('courses', __name__)
 

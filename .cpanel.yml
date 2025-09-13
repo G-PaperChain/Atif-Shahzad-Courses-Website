@@ -1,43 +1,47 @@
 ---
 deployment:
   tasks:
-    # Install Python dependencies for Flask backend
-    - export DEPLOYPATH=/home/dratifshahzad/public_html/
-    - /bin/cp -R backend $DEPLOYPATH
-    - /bin/cp -R frontend $DEPLOYPATH
+    # Set deployment path
+    - export DEPLOYPATH=/home/dratifshahzad/public_html
     
-    # Install backend dependencies
-    - cd $DEPLOYPATH/backend
-    - python3 -m pip install --user -r requirements.txt
+    # Copy backend and frontend
+    - /bin/cp -R backend $DEPLOYPATH/
+    - /bin/cp -R frontend $DEPLOYPATH/
     
-    # Build React frontend
-    - cd $DEPLOYPATH/frontend
-    - npm install
-    - npm run build
+    # Install backend dependencies with user flag
+    - cd $DEPLOYPATH/backend && /usr/local/bin/python3.9 -m pip install --user -r requirements.txt
     
-    # Copy built React files to public directory
-    - /bin/cp -R $DEPLOYPATH/frontend/dist/* $DEPLOYPATH/public_html/
+    # Install frontend dependencies and build
+    - cd $DEPLOYPATH/frontend && npm install && npm run build
     
-    # Set up Flask app
-    - cd $DEPLOYPATH
-    - /bin/cp backend/run.py ./
+    # Copy React build to the root public_html (not inside another folder)
+    - /bin/cp -R $DEPLOYPATH/frontend/dist/* $DEPLOYPATH/
     
-    # Create passenger_wsgi.py for cPanel
+    # Create passenger_wsgi.py in root
     - |
       cat > $DEPLOYPATH/passenger_wsgi.py << 'EOF'
       import sys
       import os
       
-      # Add your project directory to sys.path
+      # Add paths
       sys.path.insert(0, os.path.dirname(__file__))
       sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
       
-      from run import app as application
+      # Set environment variables for production
+      os.environ.setdefault('SECRET_KEY', 'production-secret-key-change-this')
+      os.environ.setdefault('JWT_SECRET_KEY', 'production-jwt-secret-change-this')
+      os.environ.setdefault('DATABASE_URL', 'sqlite:///app.db')
+      
+      from app import create_app
+      application = create_app()
       
       if __name__ == "__main__":
           application.run()
       EOF
     
-    # Set permissions
+    # Set proper permissions
     - find $DEPLOYPATH -type f -name "*.py" -exec chmod 644 {} \;
-    - chmod 755 $DEPLOYPATH/passenger_wsgi.py
+    - chmod 644 $DEPLOYPATH/passenger_wsgi.py
+    
+    # Initialize database
+    - cd $DEPLOYPATH/backend && /usr/local/bin/python3.9 -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all()"

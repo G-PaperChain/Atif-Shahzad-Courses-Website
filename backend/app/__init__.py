@@ -38,13 +38,13 @@ def create_app():
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
-    CORS(app, resources={r"/*": {"origins": "https://dratifshahzad.com"}})
+    CORS(app, resources={r"/*": {"origins": "*"}})
     migrate.init_app(app, db)
 
     # Register blueprints
     from app.routes.auth import auth_bp
     from app.routes.courses import courses_bp
     app.register_blueprint(auth_bp, url_prefix='/api')
-    app.register_blueprint(auth_bp, url_prefix='/courses')
+    app.register_blueprint(courses_bp, url_prefix='/api')
 
     return app
