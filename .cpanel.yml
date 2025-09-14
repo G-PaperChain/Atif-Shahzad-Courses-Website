@@ -4,8 +4,8 @@ deployment:
     - export FLASK_PATH=/home/dratifshahzad/myapp
     - export PUBLIC_PATH=/home/dratifshahzad/public_html
     
-    - /bin/rsync -avz --exclude '.git' myapp/backend/ $FLASK_PATH/
-    - /bin/rsync -avz myapp/frontend/dist/ $PUBLIC_PATH/
+    - /bin/rsync -avz --exclude '.git' backend/ $FLASK_PATH/
+    - /bin/rsync -avz frontend/dist/ $PUBLIC_PATH/
     
     - cd $FLASK_PATH && python -m pip install -r requirements.txt
     
