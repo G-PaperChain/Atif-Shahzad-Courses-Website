@@ -1,29 +1,23 @@
 ---
+# The document start marker. This is optional but good practice.
 deployment:
   tasks:
     - export FLASK_PATH=/home/dratifshahzad/myapp
     - export PUBLIC_PATH=/home/dratifshahzad/public_html
     
-    # Copy backend files recursively, excluding the .git directory
     - /bin/rsync -avz --exclude '.git' backend/ $FLASK_PATH/
-
-    # Copy frontend build files
     - /bin/rsync -avz frontend/dist/ $PUBLIC_PATH/
     
-    # Install Python dependencies. Change 'python' to 'python3' if needed.
     - cd $FLASK_PATH && python -m pip install -r requirements.txt
     
-    # Create the tmp directory and restart file
     - mkdir -p $FLASK_PATH/tmp
     - touch $FLASK_PATH/tmp/restart.txt
     
-    # Set file and directory permissions for both paths
     - find $FLASK_PATH -type f -exec chmod 644 {} \;
     - find $FLASK_PATH -type d -exec chmod 755 {} \;
     - find $PUBLIC_PATH -type f -exec chmod 644 {} \;
     - find $PUBLIC_PATH -type d -exec chmod 755 {} \;
     
-    # Create or overwrite the .htaccess file with the correct content
     - |
       cat > $PUBLIC_PATH/.htaccess << 'EOF'
       RewriteEngine On
