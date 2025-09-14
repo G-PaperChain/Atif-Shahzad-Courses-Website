@@ -7,11 +7,6 @@ deployment:
     - /bin/rsync -avz --exclude '.git' /backend/ $FLASK_PATH/
     - /bin/rsync -avz /frontend/dist/ $PUBLIC_PATH/
     
-    - cd $FLASK_PATH && python -m pip install -r requirements.txt
-    
-    - mkdir -p $FLASK_PATH/tmp
-    - touch $FLASK_PATH/tmp/restart.txt
-    
     - find $FLASK_PATH -type f -exec chmod 644 {} \;
     - find $FLASK_PATH -type d -exec chmod 755 {} \;
     - find $PUBLIC_PATH -type f -exec chmod 644 {} \;
