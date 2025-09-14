@@ -18,20 +18,12 @@ export const useAuth = () => {
   return context;
 };
 
-/**
- * AuthProvider (Production Ready)
- * - Base URL: https://dratifshahzad.com/api
- * - Stores tokens in localStorage (simple; for true production use, consider HttpOnly cookies).
- * - Handles 401 refresh flow with queuing.
- */
 export const AuthProvider = ({ children }) => {
-  const API_BASE =
-    import.meta.env.VITE_API_BASE || "https://dratifshahzad.com/api";
+  const API_BASE = "https://dratifshahzad.com/api"
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Axios instance
   const api = useMemo(() => {
     return axios.create({
       baseURL: API_BASE,
@@ -39,7 +31,6 @@ export const AuthProvider = ({ children }) => {
     });
   }, [API_BASE]);
 
-  // Token refresh control
   const isRefreshing = useRef(false);
   const refreshSubscribers = useRef([]);
 
