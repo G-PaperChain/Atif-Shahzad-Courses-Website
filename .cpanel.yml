@@ -1,12 +1,11 @@
 ---
-# The document start marker. This is optional but good practice.
 deployment:
   tasks:
     - export FLASK_PATH=/home/dratifshahzad/myapp
     - export PUBLIC_PATH=/home/dratifshahzad/public_html
     
-    - /bin/rsync -avz --exclude '.git' backend/ $FLASK_PATH/
-    - /bin/rsync -avz frontend/dist/ $PUBLIC_PATH/
+    - /bin/rsync -avz --exclude '.git' mayapp/backend/ $FLASK_PATH/
+    - /bin/rsync -avz mayapp/frontend/dist/ $PUBLIC_PATH/
     
     - cd $FLASK_PATH && python -m pip install -r requirements.txt
     
@@ -28,5 +27,5 @@ deployment:
       RewriteCond %{REQUEST_FILENAME} !-f
       RewriteCond %{REQUEST_FILENAME} !-d
       RewriteCond %{REQUEST_URI} !^/api/
-      RewriteRule ^ /index.html [L]
+      RewriteRule . /index.html [L]
       EOF
