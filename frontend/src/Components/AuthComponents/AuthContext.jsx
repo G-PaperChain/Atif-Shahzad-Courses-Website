@@ -19,7 +19,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const API_BASE = "https://dratifshahzad.com/api"
+  const API_BASE = "https://dratifshahzad.com"
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
