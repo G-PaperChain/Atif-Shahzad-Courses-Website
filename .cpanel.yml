@@ -1,7 +1,4 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/dratifshahzad/public_html/
-    - /bin/cp -R /home/dratifshahzad/myapp/frontend/dist/* $DEPLOYPATH
-    - export BACKENDPATH=/home/dratifshahzad/myapp/
-    - /bin/cp -R /home/dratifshahzad/myapp/backend/* $BACKENDPATH
+    - /bin/ls -la
