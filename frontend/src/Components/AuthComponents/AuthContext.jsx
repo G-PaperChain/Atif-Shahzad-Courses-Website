@@ -1,4 +1,3 @@
-// src/contexts/AuthProvider.jsx
 import React, {
   createContext,
   useContext,
@@ -19,7 +18,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const API_BASE = "https://dratifshahzad.com"
+  const API_BASE = "https://dratifshahzad.com/api"
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
