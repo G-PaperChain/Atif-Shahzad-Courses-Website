@@ -41,10 +41,10 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": "*"}})
     migrate.init_app(app, db)
 
-    # Register blueprints
+    # Register blueprints with API prefix
     from app.routes.auth import auth_bp
     from app.routes.courses import courses_bp
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(courses_bp)
+    app.register_blueprint(auth_bp, url_prefix='/api')
+    app.register_blueprint(courses_bp, url_prefix='/api')
 
     return app
