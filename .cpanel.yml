@@ -2,4 +2,4 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/dratifshahzad/public_html/
-    - /bin/cp -R home/dratifshahzad/mainapp/repo/frontend/dist $DEPLOYPATH
+    - /bin/cp -R /home/dratifshahzad/mainapp/repo/frontend/dist $DEPLOYPATH
