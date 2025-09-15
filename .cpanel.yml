@@ -1,16 +1,5 @@
 ---
 deployment:
   tasks:
-    - cp -r backend/* /home/dratifshahzad/myapp/
-    - cp -r frontend/dist/* /home/dratifshahzad/public_html/
-    - chmod -R 644 /home/dratifshahzad/myapp/*
-    - chmod -R 755 /home/dratifshahzad/myapp
-    - chmod -R 644 /home/dratifshahzad/public_html/*
-    - chmod -R 755 /home/dratifshahzad/public_html
-    - echo 'RewriteEngine On' > /home/dratifshahzad/public_html/.htaccess
-    - echo 'RewriteCond %{REQUEST_URI} ^/api/' >> /home/dratifshahzad/public_html/.htaccess
-    - echo 'RewriteRule ^api/(.*)$ /cgi-bin/myapp/$1 [L,P,QSA]' >> /home/dratifshahzad/public_html/.htaccess
-    - echo 'RewriteCond %{REQUEST_FILENAME} !-f' >> /home/dratifshahzad/public_html/.htaccess
-    - echo 'RewriteCond %{REQUEST_FILENAME} !-d' >> /home/dratifshahzad/public_html/.htaccess
-    - echo 'RewriteCond %{REQUEST_URI} !^/api/' >> /home/dratifshahzad/public_html/.htaccess
-    - echo 'RewriteRule . /index.html [L]' >> /home/dratifshahzad/public_html/.htaccess
+    - /bin/cp -R frontend/dist/* /home/dratifshahzad/public_html/
+    - /bin/cp -R backend/* /home/dratifshahzad/myapp/
