@@ -1,6 +1,24 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/dratifshahzad/public_html
-    - /bin/cp index.html $DEPLOYPATH
-    - /bin/cp -R frontend/dist/* $DEPLOYPATH
+    # Create necessary directories
+    - mkdir -p /home/dratifshahzad/public_html
+    - mkdir -p /home/dratifshahzad/myapp
+    
+    # Deploy frontend to public_html
+    - /bin/cp -rf frontend/dist/* /home/dratifshahzad/public_html/
+    
+    # Deploy backend to myapp directory  
+    - /bin/cp -rf backend/* /home/dratifshahzad/myapp/
+    
+    # Set correct permissions
+    - /bin/find /home/dratifshahzad/public_html -type f -exec chmod 644 {} \;
+    - /bin/find /home/dratifshahzad/public_html -type d -exec chmod 755 {} \;
+    - /bin/find /home/dratifshahzad/myapp -type f -exec chmod 644 {} \;
+    - /bin/find /home/dratifshahzad/myapp -type d -exec chmod 755 {} \;
+    
+    # Create .htaccess for React routing and API proxy
+    - printf 'RewriteEngine On\nRewriteCond %%{REQUEST_URI} ^/api/\nRewriteRule ^api/(.*)$ /cgi-bin/myapp/$1 [L,P,QSA]\nRewriteCond %%{REQUEST_FILENAME} !-f\nRewriteCond %%{REQUEST_FILENAME} !-d\nRewriteCond %%{REQUEST_URI} !^/api/\nRewriteRule . /index.html [L]\n' > /home/dratifshahzad/public_html/.htaccess
+    
+    # Make Python files executable
+    - chmod +x /home/dratifshahzad/myapp/run.py
