@@ -1,18 +1,5 @@
 ---
 deployment:
   tasks:
-    - mkdir -p /home/dratifshahzad/public_html
-    - mkdir -p /home/dratifshahzad/myapp
-    
-    - /bin/cp -rf frontend/dist/* /home/dratifshahzad/public_html/
-    
-    - /bin/cp -rf backend/* /home/dratifshahzad/myapp/
-    
-    - /bin/find /home/dratifshahzad/public_html -type f -exec chmod 644 {} \;
-    - /bin/find /home/dratifshahzad/public_html -type d -exec chmod 755 {} \;
-    - /bin/find /home/dratifshahzad/myapp -type f -exec chmod 644 {} \;
-    - /bin/find /home/dratifshahzad/myapp -type d -exec chmod 755 {} \;
-    
-    - printf 'RewriteEngine On\nRewriteCond %%{REQUEST_URI} ^/api/\nRewriteRule ^api/(.*)$ /cgi-bin/myapp/$1 [L,P,QSA]\nRewriteCond %%{REQUEST_FILENAME} !-f\nRewriteCond %%{REQUEST_FILENAME} !-d\nRewriteCond %%{REQUEST_URI} !^/api/\nRewriteRule . /index.html [L]\n' > /home/dratifshahzad/public_html/.htaccess
-    
-    - chmod +x /home/dratifshahzad/myapp/run.py
+    - export DEPLOYPATH=/home/dratifshahzad/public_html/
+    - /bin/cp -R home/dratifshahzad/mainApp/frontend/dist $DEPLOYPATH
