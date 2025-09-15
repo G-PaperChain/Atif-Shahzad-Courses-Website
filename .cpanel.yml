@@ -1,4 +1,6 @@
 ---
 deployment:
   tasks:
-    - /bin/ls -la
+    - export DEPLOYPATH=/home/dratifshahzad/public_html
+    - /bin/cp index.html $DEPLOYPATH
+    - /bin/cp -R frontend/dist/* $DEPLOYPATH
