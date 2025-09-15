@@ -4,5 +4,5 @@ deployment:
     - export DEPLOYPATH=/home/dratifshahzad/public_html/
     - /bin/cp -R /home/dratifshahzad/mainapp/repo/frontend/dist/* $DEPLOYPATH
 
-    - export DEPLOYPATH=/home/dratifshahzad/mainapp/
+    - export DEPLOYPATH=/home/dratifshahzad/public_html/api/
     - /bin/cp -R /home/dratifshahzad/mainapp/repo/backend/* $DEPLOYPATH
