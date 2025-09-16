@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Courses from './Components/CoursesComponents/CoursesPage.jsx';
 import AdminPanel from './Components/AdminComponents/AdminPanel.jsx';
 import { AuthProvider } from './Components/AuthComponents/AuthContext.jsx';
+import Layout from './Components/Layout.jsx';
 
 
 const router = createBrowserRouter([
