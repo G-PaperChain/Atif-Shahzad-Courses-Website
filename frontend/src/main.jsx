@@ -9,9 +9,15 @@ import { AuthProvider } from './Components/AuthComponents/AuthContext.jsx';
 
 
 const router = createBrowserRouter([
-  { path: "/", element: <App /> },
-  { path: "/courses", element: <Courses /> },
-  { path: "/admin", element: <AdminPanel /> },
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      { index: true, element: <App /> },
+      { path: "courses", element: <Courses /> },
+      { path: "admin", element: <AdminPanel /> },
+    ],
+  },
 ]);
 
 createRoot(document.getElementById('root')).render(
