@@ -2,12 +2,11 @@ import React from 'react'
 import { useState } from 'react'
 import axios from 'axios'
 
-
 const AdminPanel = () => {
     const green = '#009640'
     const handleChange = (e) => {
         e.preventDefault()
-        axios.post('http://localhost:5000/api/courses')
+        // axios.post('http://localhost:5000/api/courses')
     }
 
     return (

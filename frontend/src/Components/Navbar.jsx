@@ -3,7 +3,7 @@ import { createPortal} from 'react-dom'
 import LoginDropdown from '../Components/AuthComponents/LoginDropdown'
 import SignupDropdown from '../Components/AuthComponents/SignupDropdown'
 import { useAuth } from '../Components/AuthComponents/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const { user, logout } = useAuth(); 
@@ -82,7 +82,7 @@ const Navbar = () => {
 
       {user ? (
         <div className="flex items-center space-x-4">
-          <span>Welcome, {user.name}!</span>
+          <span>Welcome, {user?.username || user?.name || "User"}!</span>
           <button
             onClick={logout}
             className="bg-red-500 text-white px-3 py-1 rounded"
@@ -96,7 +96,7 @@ const Navbar = () => {
           <div className="navbar-right flex gap-4 justify-center">
             <button
               ref={loginBtnRef}
-              className="btn bg-green-700 py-2 px-4 rounded-radius hover:bg-green-800 cursor-pointer text-gray-50 text-xs transition-colors duration-200"
+              className="btn bg-green-700 py-3 px-4 rounded-radius hover:bg-green-800 cursor-pointer text-gray-50 text-xs transition-colors duration-200"
               onClick={toggleLogin}
             >
               Log in
@@ -104,7 +104,7 @@ const Navbar = () => {
 
             <button
               ref={signupBtnRef}
-              className="btn bg-green-700 py-2 px-4 rounded-radius hover:bg-green-800 cursor-pointer text-gray-50 text-xs transition-colors duration-200"
+              className="btn bg-green-700 py-3 px-4 rounded-radius hover:bg-green-800 cursor-pointer text-gray-50 text-xs transition-colors duration-200"
               onClick={toggleSignup}
             >
               Sign Up
@@ -113,10 +113,6 @@ const Navbar = () => {
         </div>
       )}
 
-
-
-
-      {/* Render dropdowns into document.body via portal so stacking contexts/fixed cards can't hide them */}
       {showLoginDropdown && createPortal(
         <div
           ref={loginDropdownRef}
