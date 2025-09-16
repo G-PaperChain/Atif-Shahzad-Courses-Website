@@ -106,12 +106,16 @@ def login():
 @auth_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
-    try:
-        identity = get_jwt_identity()
-        new_access_token = create_access_token(identity=identity)
-        return jsonify({'access_token': new_access_token}), 200
-    except Exception as e:
-        return jsonify(error=str(e)), 401
+    identity = get_jwt_identity()
+    user = User.query.get(identity)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    new_access_token = create_access_token(
+        identity=user.id,
+        additional_claims={"role": user.role}
+    )
+    return jsonify(access_token=new_access_token), 200
 
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
