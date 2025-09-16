@@ -66,4 +66,3 @@ logger.info('Application is ready to serve requests')
 if __name__ == '__main__':
     logger.info('Running in development mode')
     app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
