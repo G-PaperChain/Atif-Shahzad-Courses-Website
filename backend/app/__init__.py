@@ -34,14 +34,26 @@ def create_app():
     if not app.config['SQLALCHEMY_DATABASE_URI']:
         raise ValueError("DATABASE_URL environment variable is required")
 
-    # Initialize extensions
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
-    CORS(app, resources={r"/*": {"origins": "*"}})
+    
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://dratifshahzad.com')
+    CORS(app, 
+         resources={r"/api/*": {"origins": [frontend_url]}},
+         supports_credentials=True,
+         allow_headers=["Content-Type", "Authorization"])
+    
     migrate.init_app(app, db)
 
-    # Register blueprints with API prefix
+    @app.route('/')
+    def health_check():
+        return {'status': 'API is running', 'version': '1.0'}, 200
+
+    @app.route('/health')
+    def health():
+        return {'status': 'healthy'}, 200
+
     from app.routes.auth import auth_bp
     from app.routes.courses import courses_bp
     app.register_blueprint(auth_bp, url_prefix='/api')
