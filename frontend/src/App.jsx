@@ -5,7 +5,6 @@ import MidContent from './Components/MidContent'
 function App() {
   return (
     <>
-      <Navbar />
       <MidContent />
     </>
   )
