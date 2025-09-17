@@ -7,6 +7,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Sidebar } from 'primereact/sidebar';
 import { IoReorderThreeOutline } from "react-icons/io5";
 import { Button } from 'primereact/button';
+import { classNames } from 'primereact/utils';
+import { IoCloseSharp } from "react-icons/io5";
 
 const Navbar = () => {
   const { user, logout, loading, isInitialized } = useAuth();
@@ -68,10 +70,6 @@ const Navbar = () => {
     }
   }, [showLoginDropdown, showSignupDropdown])
 
-  // const renderSidebar = () => {
-  //   return <Sidebar />
-  // }
-
   const renderAuthSection = () => {
     if (loading || !isInitialized) {
       return (
@@ -99,10 +97,10 @@ const Navbar = () => {
     }
 
     return (
-      <div className="navbar-right flex gap-4 justify-center col-start-3 max-sm:col-start-3 w-full">
+      <div className="navbar-right flex gap-4 justify-center col-start-3 max-sm:col-start-2 w-full h-full items-center max-[770px]:col-start-2 ">
         <button
           ref={loginBtnRef}
-          className="btn bg-green-700 py-2 px-4 rounded-radius hover:bg-green-800 cursor-pointer text-gray-50 text-xs transition-colors duration-200 rounded-sm"
+          className="btn bg-green-700 py-2 px-4 rounded-radius hover:bg-green-800 cursor-pointer text-gray-50 text-xs transition-colors duration-200 rounded-sm h-max max-sm:py-1 max-sm:px-2"
           onClick={toggleLogin}
         >
           Log in
@@ -110,7 +108,7 @@ const Navbar = () => {
 
         <button
           ref={signupBtnRef}
-          className="btn bg-green-700 py-2 px-4 rounded-radius hover:bg-green-800 cursor-pointer text-gray-50 text-xs transition-colors duration-200 rounded-sm"
+          className="btn bg-green-700 py-2 px-4 rounded-radius hover:bg-green-800 cursor-pointer text-gray-50 text-xs transition-colors duration-200 rounded-sm h-max max-sm:py-1 max-sm:px-2"
           onClick={toggleSignup}
         >
           Sign Up
@@ -120,9 +118,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="NAVBAR w-full min-w-full grid justify-between items-center sticky top-0 p-3 bg-red-100 z-50 grid-cols-3 max-sm:grid-cols-3">
+    <nav className="NAVBAR w-full min-w-full grid justify-between items-center sticky top-0 p-3 bg-green-100 z-50 grid-cols-3 max-sm:grid-cols-2 grid-rows-1 max-[770px]:grid-cols-2">
 
-      <div className="togglebtn sm:hidden flex justify-start">
+      <div className="togglebtn lg:hidden flex justify-start max-sm:col-start-1 max-sm:row-start-1 max-[770px]:col-start-1 max-[770px]:row-start-1 ">
         <Button onClick={() => {
           setVisible(true)
           SetshowSidebar(!showSidebar)
@@ -132,17 +130,23 @@ const Navbar = () => {
         </Button>
       </div>
 
-      <div className='text-2xl font-extrabold flex justify-center text-green-700 col-start-1 max-sm:col-start-2'>
+      <div
+        className='text-2xl font-extrabold flex justify-center text-green-700 col-start-1 max-[321px]:text-xs max-sm:col-start-1 max-sm:row-start-1 max-sm:ml-8 max-[380px]:text-base max-[430px]:text-lg max-[770px]:text-2xl max-[770px]:row-start-1'>
         <h1 className='select-none'>Dr. Atif Shahzad</h1>
       </div>
 
-
-      <Sidebar visible={visible} onHide={() => setVisible(false)} className='bg-red-600'>
-        <h2>Basim</h2>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis voluptatem sint asperiores.</p>
+      <Sidebar visible={visible} onHide={() => setVisible(false)} className='bg-green-200 max-w-1/2 md:max-w-1/4' closeIcon={<IoCloseSharp className='text-2xl text-green-700 m-2' />}>
+        <div className="navbar-left flex items-center list-none justify-center gap-16 col-start-2">
+          <ul className="flex gap-4 items-center justify-center flex-col mt-10">
+            <Link to={'/'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Home</li></Link>
+            <Link to={'/courses'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Courses</li></Link>
+            <Link to={'/'} className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>About</Link>
+            <li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Contact</li>
+          </ul>
+        </div>
       </Sidebar>
 
-      <div className="navbar-left flex items-center list-none justify-center gap-16 col-start-2 max-sm:hidden">
+      <div className="navbar-left flex items-center list-none justify-center gap-16 col-start-2 max-[770px]:hidden">
         <ul className="flex gap-9 items-center justify-center">
           <Link to={'/'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Home</li></Link>
           <Link to={'/courses'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Courses</li></Link>
@@ -151,11 +155,8 @@ const Navbar = () => {
         </ul>
       </div>
 
-
-      {/* LOGIN SIGNUP BTNS OR LOGOUT */}
       {renderAuthSection()}
 
-      {/* Only show dropdowns if not logged in and not loading */}
       {!user && !loading && isInitialized && showLoginDropdown && createPortal(
         <div
           ref={loginDropdownRef}
@@ -167,7 +168,9 @@ const Navbar = () => {
       )}
 
       {!user && !loading && isInitialized && showSignupDropdown && createPortal(
-        <div ref={signupDropdownRef} className="fixed right-16 top-16 z-[9999] pointer-events-auto">
+        <div
+          ref={signupDropdownRef}
+          className="fixed right-16 top-16 z-[9999] pointer-events-auto">
           <SignupDropdown inverseDropdownshow={inverseDropdownshow} />
         </div>,
         document.body

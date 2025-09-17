@@ -45,10 +45,11 @@ const MidContent = () => {
 
 
     return (
-        <div className='flex flex-col z-0 h-max bg-red-500'>
-            <h1 className="ml-6 text-6xl font-bold flex justify-center mt-10 text-transparent bg-clip-text bg-gradient-to-b from-green-800 to-green-500 p-2 select-none">
-                <HiMiniSparkles className='text-amber-500 mr-2.5 text-3xl cursor-pointer transition-all duration-150 hover:text-amber-400' />
-                Your gateway to&nbsp;
+        <div className='flex flex-col z-0 h-max items-center'>
+
+            <h1 className="text-5xl max-sm:text-3xl font-bold flex justify-center mt-10 max-sm:mt-5 text-transparent bg-clip-text bg-gradient-to-b from-green-800 to-green-500 p-2 max-sm:p-0 max-sm:flex-col items-center max:sm:w-max max-[770px]:w-max max-[770px]:place-self-center-safe">
+                <HiMiniSparkles className='text-amber-500 mr-2.5 text-3xl max-sm:text-xl max-sm:mr-0.5 cursor-pointer transition-all duration-150 hover:text-amber-400 max-sm:place-self-start max-sm:-ml-3' />
+                <p className=''>Your gateway to&nbsp;</p>
                 <span
                     className="typing-effect"
                     style={{
@@ -61,7 +62,7 @@ const MidContent = () => {
 
             {/* Actual hero */}
 
-            <div className="grid grid-cols-3 mt-8 h-full z-50"> 
+            <div className="grid grid-cols-1 lg:grid-cols-3 mt-4 lg:mt-8 h-full z-50">
 
                 <div className="flex justify-center items-center p-4 flex-col gap-2">
                     <p className="text-green-700 text-xl font-semibold text-center bg-green-200 px-4 w-1/2 py-5 rounded-2xl">

@@ -30,7 +30,8 @@ const LoginDropdown = (props) => {
         <div
             className='flex flex-col justify-center px-6 py-6 fixed right-16 top-16 bg-green-200 rounded-lg z-50
             shadow-2xl border border-gray-800 w-80
-            transition-all duration-300 ease-out transform'
+            transition-all duration-300 ease-out transform
+            max-sm:px-4 max-sm:py-4 max-sm:right-3 max-sm:w-74'
         >
             <h2 className="mt-2 text-center text-xl font-bold tracking-tight z-50">
                 Sign in to your account
