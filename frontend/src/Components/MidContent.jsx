@@ -45,7 +45,7 @@ const MidContent = () => {
 
 
     return (
-        <div className='flex flex-col z-0 h-max'>
+        <div className='flex flex-col z-0 h-max bg-red-500'>
             <h1 className="ml-6 text-6xl font-bold flex justify-center mt-10 text-transparent bg-clip-text bg-gradient-to-b from-green-800 to-green-500 p-2 select-none">
                 <HiMiniSparkles className='text-amber-500 mr-2.5 text-3xl cursor-pointer transition-all duration-150 hover:text-amber-400' />
                 Your gateway to&nbsp;

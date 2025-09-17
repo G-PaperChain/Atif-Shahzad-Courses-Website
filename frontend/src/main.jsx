@@ -7,7 +7,7 @@ import Courses from './Components/CoursesComponents/CoursesPage.jsx';
 import AdminPanel from './Components/AdminComponents/AdminPanel.jsx';
 import { AuthProvider } from './Components/AuthComponents/AuthContext.jsx';
 import Layout from './Components/Layout.jsx';
-
+import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
 
 const router = createBrowserRouter([
   {
@@ -22,9 +22,12 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById('root')).render(
-  <AuthProvider>
-    <StrictMode>
-      <RouterProvider router={router} />
-    </StrictMode>
-  </AuthProvider>
+  <PrimeReactProvider>
+    <AuthProvider>
+      <StrictMode>
+        <RouterProvider router={router} />
+      </StrictMode>
+    </AuthProvider>
+  </PrimeReactProvider>
+
 )
