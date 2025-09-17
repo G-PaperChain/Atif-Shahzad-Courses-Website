@@ -41,11 +41,9 @@ def register():
         if not validate_password(password):
             return jsonify({'error': 'Password must be at least 8 characters with uppercase, lowercase, and number'}), 400
         
-        # Check if user exists
         if User.query.filter_by(email=email).first():
             return jsonify({'error': 'Email already registered'}), 409
         
-        # Create user
         password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
         user = User(
             email=email,

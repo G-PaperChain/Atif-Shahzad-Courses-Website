@@ -17,11 +17,44 @@ export const useAuth = () => {
   return context;
 };
 
+// Helper function to decode JWT and check expiration
+const isTokenExpired = (token) => {
+  if (!token) return true;
+  
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Date.now() / 1000;
+    
+    // Check if token expires within next 5 minutes (300 seconds buffer)
+    return payload.exp < (currentTime + 300);
+  } catch (error) {
+    console.error('Error decoding token:', error);
+    return true;
+  }
+};
+
+// Helper function to check if refresh token is expired
+const isRefreshTokenExpired = (token) => {
+  if (!token) return true;
+  
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Date.now() / 1000;
+    
+    // No buffer for refresh token - check exact expiration
+    return payload.exp < currentTime;
+  } catch (error) {
+    console.error('Error decoding refresh token:', error);
+    return true;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
-  const API_BASE = "https://api.dratifshahzad.com/api"
+  const API_BASE = "https://api.dratifshahzad.com/api";
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const api = useMemo(() => {
     return axios.create({
@@ -46,15 +79,80 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     setUser(null);
+    setIsInitialized(true);
   }, []);
+
+  const refreshAccessToken = useCallback(async () => {
+    const refreshToken = localStorage.getItem("refresh_token");
+    
+    if (!refreshToken || isRefreshTokenExpired(refreshToken)) {
+      logout();
+      throw new Error("No valid refresh token");
+    }
+
+    if (isRefreshing.current) {
+      // Return a promise that resolves when refresh completes
+      return new Promise((resolve, reject) => {
+        subscribeTokenRefresh((newToken) => {
+          if (newToken) resolve(newToken);
+          else reject(new Error("Token refresh failed"));
+        });
+      });
+    }
+
+    isRefreshing.current = true;
+    
+    try {
+      const refreshRes = await axios.post(
+        `${API_BASE}/refresh`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${refreshToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const newAccessToken = refreshRes?.data?.access_token;
+      if (!newAccessToken) throw new Error("No access token returned");
+
+      localStorage.setItem("access_token", newAccessToken);
+      onRefreshed(newAccessToken);
+      
+      return newAccessToken;
+    } catch (err) {
+      console.error("Token refresh failed:", err);
+      onRefreshed(null);
+      logout();
+      throw err;
+    } finally {
+      isRefreshing.current = false;
+    }
+  }, [API_BASE, logout]);
 
   // Attach interceptors once
   useEffect(() => {
     // Add Authorization header
     const reqId = api.interceptors.request.use(
-      (config) => {
-        const token = localStorage.getItem("access_token");
-        if (token) config.headers.Authorization = `Bearer ${token}`;
+      async (config) => {
+        let token = localStorage.getItem("access_token");
+        
+        // Check if token is expired and refresh if needed
+        if (token && isTokenExpired(token)) {
+          try {
+            token = await refreshAccessToken();
+          } catch (error) {
+            // If refresh fails, let the request proceed without token
+            // The response interceptor will handle the 401
+            console.error("Failed to refresh token in request interceptor:", error);
+          }
+        }
+        
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        
         return config;
       },
       (error) => Promise.reject(error)
@@ -69,51 +167,14 @@ export const AuthProvider = ({ children }) => {
 
         if (status === 401 && originalRequest && !originalRequest._retry) {
           originalRequest._retry = true;
-          const refreshToken = localStorage.getItem("refresh_token");
-
-          if (!refreshToken) {
-            logout();
-            return Promise.reject(error);
-          }
-
-          if (isRefreshing.current) {
-            // queue requests until refresh finishes
-            return new Promise((resolve) => {
-              subscribeTokenRefresh((newToken) => {
-                originalRequest.headers.Authorization = `Bearer ${newToken}`;
-                resolve(api(originalRequest));
-              });
-            });
-          }
-
-          isRefreshing.current = true;
+          
           try {
-            const refreshRes = await axios.post(
-              `${API_BASE}/refresh`,
-              null,
-              {
-                headers: {
-                  Authorization: `Bearer ${refreshToken}`,
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-
-            const newAccessToken = refreshRes?.data?.access_token;
-            if (!newAccessToken) throw new Error("No access token returned");
-
-            localStorage.setItem("access_token", newAccessToken);
-            api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
-
-            onRefreshed(newAccessToken);
-
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            const newToken = await refreshAccessToken();
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
             return api(originalRequest);
-          } catch (err) {
-            logout();
-            return Promise.reject(err);
-          } finally {
-            isRefreshing.current = false;
+          } catch (refreshError) {
+            console.error("Failed to refresh token in response interceptor:", refreshError);
+            return Promise.reject(error);
           }
         }
 
@@ -125,33 +186,75 @@ export const AuthProvider = ({ children }) => {
       api.interceptors.request.eject(reqId);
       api.interceptors.response.eject(resId);
     };
-  }, [api, API_BASE, logout]);
+  }, [api, refreshAccessToken]);
 
-  // Load current user
+  // Enhanced user fetch with better error handling
   const fetchCurrentUser = useCallback(async () => {
+    const accessToken = localStorage.getItem("access_token");
+    const refreshToken = localStorage.getItem("refresh_token");
+    
+    // If no tokens exist, user is not logged in
+    if (!accessToken && !refreshToken) {
+      setLoading(false);
+      setIsInitialized(true);
+      return;
+    }
+    
+    // If refresh token is expired, logout immediately
+    if (refreshToken && isRefreshTokenExpired(refreshToken)) {
+      logout();
+      setLoading(false);
+      return;
+    }
+    
     try {
       const res = await api.get("/me");
       setUser(res.data.user || null);
     } catch (err) {
       console.error("fetchCurrentUser error:", err?.response?.data || err);
-      logout();
+      
+      // Only logout if it's not a network error
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        logout();
+      } else {
+        // For network errors, keep user logged in but show they're offline
+        console.warn("Network error while fetching user, keeping logged in");
+      }
     } finally {
       setLoading(false);
+      setIsInitialized(true);
     }
   }, [api, logout]);
 
+  // Initialize auth state
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
+    if (!isInitialized) {
       fetchCurrentUser();
-    } else {
-      setLoading(false);
     }
-  }, [fetchCurrentUser]);
+  }, [fetchCurrentUser, isInitialized]);
 
-  // Auth actions
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const accessToken = localStorage.getItem("access_token");
+      const refreshToken = localStorage.getItem("refresh_token");
+      
+      if (accessToken && refreshToken && !isRefreshTokenExpired(refreshToken)) {
+        // If access token will expire in next 5 minutes, refresh it
+        if (isTokenExpired(accessToken)) {
+          refreshAccessToken().catch(() => {
+            // Silently fail - the next API call will handle the refresh
+          });
+        }
+      }
+    }, 5 * 60 * 1000); // Check every 5 minutes
+
+    return () => clearInterval(interval);
+  }, [refreshAccessToken]);
+
+  // Auth actions with better error handling
   const login = async (email, password) => {
     try {
+      setLoading(true);
       const res = await api.post("/login", { email, password });
       const { access_token, refresh_token, user } = res.data;
 
@@ -164,11 +267,14 @@ export const AuthProvider = ({ children }) => {
       const message =
         err?.response?.data?.error || err.message || "Login failed";
       return { success: false, error: message };
+    } finally {
+      setLoading(false);
     }
   };
 
   const register = async (userData) => {
     try {
+      setLoading(true);
       const res = await api.post("/register", userData);
       const { access_token, refresh_token, user } = res.data;
 
@@ -181,6 +287,8 @@ export const AuthProvider = ({ children }) => {
       const message =
         err?.response?.data?.error || err.message || "Registration failed";
       return { success: false, error: message };
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -201,12 +309,14 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
-    api, // axios instance for custom API calls
+    isInitialized,
+    api,
     login,
     register,
     logout,
     fetchCurrentUser,
     changePassword,
+    refreshAccessToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
