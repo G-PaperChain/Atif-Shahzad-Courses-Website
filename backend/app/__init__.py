@@ -8,6 +8,7 @@ import os
 import sys
 from datetime import timedelta
 from dotenv import load_dotenv
+from flask_wtf.csrf import CSRFProtect
 
 load_dotenv()
 
@@ -15,6 +16,7 @@ db = SQLAlchemy()
 bcrypt = Bcrypt()
 jwt = JWTManager()
 migrate = Migrate()
+csrf = CSRFProtect()
 
 def create_app():
     app = Flask(__name__)
@@ -24,8 +26,13 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+
+    app.config['JWT_COOKIE_SECURE'] = True
+    app.config['JWT_COOKIE_HTTPONLY'] = True
+    app.config['JWT_COOKIE_SAMESITE'] = 'Lax'
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
+    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=7)
+    app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 
     # Validate env vars
     if not app.config['SECRET_KEY']:
@@ -39,6 +46,7 @@ def create_app():
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
+    csrf.init_app(app)
     
     # PRODUCTION CORS - Replace with your actual frontend domain
     frontend_url = os.environ.get('FRONTEND_URL', 'https://dratifshahzad.com')

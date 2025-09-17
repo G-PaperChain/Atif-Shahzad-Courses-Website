@@ -1,8 +1,10 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from datetime import timedelta
 from app import db, bcrypt
 from app.models.User import User
 import re
+from flask_wtf.csrf import generate_csrf
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -20,6 +22,20 @@ def validate_password(password):
     if not re.search(r'\d', password):
         return False
     return True
+
+# CSRF token endpoint
+@auth_bp.route('/csrf-token', methods=['GET'])
+def get_csrf_token():
+    token = generate_csrf()
+    response = jsonify({"csrfToken": token})
+    response.set_cookie(
+        'csrf_token',
+        token,
+        secure=True,
+        samesite='Lax',
+        max_age=3600
+    )
+    return response
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -56,16 +72,53 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        # Create tokens - CONVERT ID TO STRING
-        access_token = create_access_token(identity=str(user.id))
-        refresh_token = create_refresh_token(identity=str(user.id))
+        # Create tokens
+        access_token = create_access_token(
+            identity=str(user.id),
+            additional_claims={"role": user.role},
+            expires_delta=timedelta(minutes=15)
+        )
+        refresh_token = create_refresh_token(
+            identity=str(user.id),
+            expires_delta=timedelta(days=7)
+        )
         
-        return jsonify({
+        # Create response with HttpOnly cookies
+        response = make_response(jsonify({
             'message': 'User registered successfully',
-            'access_token': access_token,
-            'refresh_token': refresh_token,
             'user': user.to_dict()
-        }), 201
+        }), 201)
+        
+        # Set secure, HttpOnly cookies
+        response.set_cookie(
+            'access_token', 
+            access_token, 
+            httponly=True, 
+            secure=True,
+            samesite='Lax',
+            max_age=900  # 15 minutes
+        )
+        
+        response.set_cookie(
+            'refresh_token', 
+            refresh_token, 
+            httponly=True,
+            secure=True,
+            samesite='Lax',
+            max_age=604800  # 7 days
+        )
+        
+        # Set CSRF token in cookie (non-HttpOnly for frontend access)
+        csrf_token = generate_csrf()
+        response.set_cookie(
+            'csrf_token',
+            csrf_token,
+            secure=True,
+            samesite='Lax',
+            max_age=3600
+        )
+        
+        return response
         
     except Exception as e:
         db.session.rollback()
@@ -90,16 +143,53 @@ def login():
         if not user.is_active:
             return jsonify({'error': 'Account deactivated'}), 401
         
-        # Create tokens - CONVERT ID TO STRING
-        access_token = create_access_token(identity=str(user.id), additional_claims={"role": user.role})
-        refresh_token = create_refresh_token(identity=str(user.id))
+        # Create tokens
+        access_token = create_access_token(
+            identity=str(user.id), 
+            additional_claims={"role": user.role},
+            expires_delta=timedelta(minutes=15)
+        )
+        refresh_token = create_refresh_token(
+            identity=str(user.id),
+            expires_delta=timedelta(days=7)
+        )
         
-        return jsonify({
+        # Create response with HttpOnly cookies
+        response = make_response(jsonify({
             'message': 'Login successful',
-            'access_token': access_token,
-            'refresh_token': refresh_token,
             'user': user.to_dict()
-        }), 200
+        }), 200)
+        
+        # Set secure, HttpOnly cookies
+        response.set_cookie(
+            'access_token', 
+            access_token, 
+            httponly=True, 
+            secure=True,
+            samesite='Lax',
+            max_age=900  # 15 minutes
+        )
+        
+        response.set_cookie(
+            'refresh_token', 
+            refresh_token, 
+            httponly=True,
+            secure=True,
+            samesite='Lax',
+            max_age=604800  # 7 days
+        )
+        
+        # Set CSRF token in cookie (non-HttpOnly for frontend access)
+        csrf_token = generate_csrf()
+        response.set_cookie(
+            'csrf_token',
+            csrf_token,
+            secure=True,
+            samesite='Lax',
+            max_age=3600
+        )
+        
+        return response
         
     except Exception as e:
         return jsonify({'error': 'Login failed'}), 500
@@ -108,23 +198,33 @@ def login():
 @jwt_required(refresh=True)
 def refresh():
     identity = get_jwt_identity()
-    # Convert back to integer for database lookup
     user = User.query.get(int(identity))
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    # Create new access token - KEEP AS STRING
+    # Create new access token
     new_access_token = create_access_token(
         identity=str(user.id),
-        additional_claims={"role": user.role}
+        additional_claims={"role": user.role},
+        expires_delta=timedelta(minutes=15)
     )
-    return jsonify(access_token=new_access_token), 200
+    
+    response = make_response(jsonify({"message": "Token refreshed"}), 200)
+    response.set_cookie(
+        'access_token', 
+        new_access_token, 
+        httponly=True, 
+        secure=True,
+        samesite='Lax',
+        max_age=900
+    )
+    
+    return response
 
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def get_current_user():
     current_user_id = get_jwt_identity()
-    # Convert back to integer for database lookup
     user = User.query.get(int(current_user_id))
     
     if not user:
@@ -142,7 +242,6 @@ def change_password():
         if not data.get('current_password') or not data.get('new_password'):
             return jsonify({'error': 'Current and new password required'}), 400
         
-        # Convert back to integer for database lookup
         user = User.query.get(int(current_user_id))
         if not user:
             return jsonify({'error': 'User not found'}), 404
@@ -161,3 +260,11 @@ def change_password():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Password change failed'}), 500
+
+@auth_bp.route('/logout', methods=['POST'])
+def logout():
+    response = make_response(jsonify({"message": "Logged out successfully"}), 200)
+    response.set_cookie('access_token', '', expires=0)
+    response.set_cookie('refresh_token', '', expires=0)
+    response.set_cookie('csrf_token', '', expires=0)
+    return response
