@@ -41,9 +41,11 @@ def register():
         if not validate_password(password):
             return jsonify({'error': 'Password must be at least 8 characters with uppercase, lowercase, and number'}), 400
         
+        # Check if user exists
         if User.query.filter_by(email=email).first():
             return jsonify({'error': 'Email already registered'}), 409
         
+        # Create user
         password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
         user = User(
             email=email,
@@ -54,9 +56,9 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        # Create tokens
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        # Create tokens - CONVERT ID TO STRING
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             'message': 'User registered successfully',
@@ -88,8 +90,9 @@ def login():
         if not user.is_active:
             return jsonify({'error': 'Account deactivated'}), 401
         
-        access_token = create_access_token(identity=user.id, additional_claims={"role": user.role})
-        refresh_token = create_refresh_token(identity=user.id)
+        # Create tokens - CONVERT ID TO STRING
+        access_token = create_access_token(identity=str(user.id), additional_claims={"role": user.role})
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             'message': 'Login successful',
@@ -105,12 +108,14 @@ def login():
 @jwt_required(refresh=True)
 def refresh():
     identity = get_jwt_identity()
-    user = User.query.get(identity)
+    # Convert back to integer for database lookup
+    user = User.query.get(int(identity))
     if not user:
         return jsonify({"error": "User not found"}), 404
 
+    # Create new access token - KEEP AS STRING
     new_access_token = create_access_token(
-        identity=user.id,
+        identity=str(user.id),
         additional_claims={"role": user.role}
     )
     return jsonify(access_token=new_access_token), 200
@@ -119,7 +124,8 @@ def refresh():
 @jwt_required()
 def get_current_user():
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    # Convert back to integer for database lookup
+    user = User.query.get(int(current_user_id))
     
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -136,7 +142,8 @@ def change_password():
         if not data.get('current_password') or not data.get('new_password'):
             return jsonify({'error': 'Current and new password required'}), 400
         
-        user = User.query.get(current_user_id)
+        # Convert back to integer for database lookup
+        user = User.query.get(int(current_user_id))
         if not user:
             return jsonify({'error': 'User not found'}), 404
         
