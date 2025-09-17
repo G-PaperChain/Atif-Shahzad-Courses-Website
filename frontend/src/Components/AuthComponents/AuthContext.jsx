@@ -16,6 +16,13 @@ export const useAuth = () => {
   return context;
 };
 
+// Helper function to get cookies
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+};
+
 export const AuthProvider = ({ children }) => {
   const API_BASE = "https://api.dratifshahzad.com/api";
   const [user, setUser] = useState(null);
@@ -23,11 +30,24 @@ export const AuthProvider = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const api = useMemo(() => {
-    return axios.create({
+    const instance = axios.create({
       baseURL: API_BASE,
-      headers: { "Content-Type": "application/json" },
-      withCredentials: true, // Critical for sending cookies
+      headers: { 
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
     });
+
+    // Add CSRF token to all requests
+    instance.interceptors.request.use((config) => {
+      const csrfToken = getCookie('csrf_token');
+      if (csrfToken && config.method !== 'get') {
+        config.headers['X-CSRF-Token'] = csrfToken;
+      }
+      return config;
+    });
+
+    return instance;
   }, [API_BASE]);
 
   const logout = useCallback(async () => {
@@ -35,6 +55,7 @@ export const AuthProvider = ({ children }) => {
       await api.post("/logout");
     } catch (err) {
       console.error("Logout API error:", err);
+      // Even if API fails, clear local state
     } finally {
       setUser(null);
       setIsInitialized(true);
@@ -47,22 +68,32 @@ export const AuthProvider = ({ children }) => {
       setUser(res.data.user || null);
     } catch (err) {
       console.error("fetchCurrentUser error:", err?.response?.data || err);
-
+      
       if (err?.response?.status === 401) {
-        logout();
+        // Silent logout without API call to avoid CSRF issues
+        setUser(null);
       }
     } finally {
       setLoading(false);
       setIsInitialized(true);
     }
-  }, [api, logout]);
+  }, [api]);
 
   // Initialize auth state
   useEffect(() => {
     if (!isInitialized) {
-      fetchCurrentUser();
+      // First, try to get CSRF token
+      axios.get(`${API_BASE}/csrf-token`, { withCredentials: true })
+        .then(() => {
+          // Then fetch user
+          fetchCurrentUser();
+        })
+        .catch((error) => {
+          console.error("CSRF token fetch failed:", error);
+          fetchCurrentUser(); // Still try to fetch user
+        });
     }
-  }, [fetchCurrentUser, isInitialized]);
+  }, [fetchCurrentUser, isInitialized, API_BASE]);
 
   // Auth actions
   const login = async (email, password) => {

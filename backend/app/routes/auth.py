@@ -75,12 +75,10 @@ def register():
         # Create tokens
         access_token = create_access_token(
             identity=str(user.id),
-            additional_claims={"role": user.role},
-            expires_delta=timedelta(minutes=15)
+            additional_claims={"role": user.role}
         )
         refresh_token = create_refresh_token(
-            identity=str(user.id),
-            expires_delta=timedelta(days=7)
+            identity=str(user.id)
         )
         
         # Create response with HttpOnly cookies
@@ -89,9 +87,9 @@ def register():
             'user': user.to_dict()
         }), 201)
         
-        # Set secure, HttpOnly cookies
+        # Set secure, HttpOnly cookies with correct names
         response.set_cookie(
-            'access_token', 
+            'access_token_cookie',  # Flask-JWT-Extended default name
             access_token, 
             httponly=True, 
             secure=True,
@@ -100,7 +98,7 @@ def register():
         )
         
         response.set_cookie(
-            'refresh_token', 
+            'refresh_token_cookie',  # Flask-JWT-Extended default name
             refresh_token, 
             httponly=True,
             secure=True,
@@ -108,20 +106,11 @@ def register():
             max_age=604800  # 7 days
         )
         
-        # Set CSRF token in cookie (non-HttpOnly for frontend access)
-        csrf_token = generate_csrf()
-        response.set_cookie(
-            'csrf_token',
-            csrf_token,
-            secure=True,
-            samesite='Lax',
-            max_age=3600
-        )
-        
         return response
         
     except Exception as e:
         db.session.rollback()
+        print(f"Registration error: {str(e)}")
         return jsonify({'error': 'Registration failed'}), 500
 
 @auth_bp.route('/login', methods=['POST'])
@@ -146,12 +135,10 @@ def login():
         # Create tokens
         access_token = create_access_token(
             identity=str(user.id), 
-            additional_claims={"role": user.role},
-            expires_delta=timedelta(minutes=15)
+            additional_claims={"role": user.role}
         )
         refresh_token = create_refresh_token(
-            identity=str(user.id),
-            expires_delta=timedelta(days=7)
+            identity=str(user.id)
         )
         
         # Create response with HttpOnly cookies
@@ -160,9 +147,9 @@ def login():
             'user': user.to_dict()
         }), 200)
         
-        # Set secure, HttpOnly cookies
+        # Set secure, HttpOnly cookies with correct names
         response.set_cookie(
-            'access_token', 
+            'access_token_cookie',  # Flask-JWT-Extended default name
             access_token, 
             httponly=True, 
             secure=True,
@@ -171,7 +158,7 @@ def login():
         )
         
         response.set_cookie(
-            'refresh_token', 
+            'refresh_token_cookie',  # Flask-JWT-Extended default name
             refresh_token, 
             httponly=True,
             secure=True,
@@ -179,58 +166,56 @@ def login():
             max_age=604800  # 7 days
         )
         
-        # Set CSRF token in cookie (non-HttpOnly for frontend access)
-        csrf_token = generate_csrf()
-        response.set_cookie(
-            'csrf_token',
-            csrf_token,
-            secure=True,
-            samesite='Lax',
-            max_age=3600
-        )
-        
         return response
         
     except Exception as e:
+        print(f"Login error: {str(e)}")
         return jsonify({'error': 'Login failed'}), 500
 
 @auth_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
-    identity = get_jwt_identity()
-    user = User.query.get(int(identity))
-    if not user:
-        return jsonify({"error": "User not found"}), 404
+    try:
+        identity = get_jwt_identity()
+        user = User.query.get(int(identity))
+        if not user:
+            return jsonify({"error": "User not found"}), 404
 
-    # Create new access token
-    new_access_token = create_access_token(
-        identity=str(user.id),
-        additional_claims={"role": user.role},
-        expires_delta=timedelta(minutes=15)
-    )
-    
-    response = make_response(jsonify({"message": "Token refreshed"}), 200)
-    response.set_cookie(
-        'access_token', 
-        new_access_token, 
-        httponly=True, 
-        secure=True,
-        samesite='Lax',
-        max_age=900
-    )
-    
-    return response
+        # Create new access token
+        new_access_token = create_access_token(
+            identity=str(user.id),
+            additional_claims={"role": user.role}
+        )
+        
+        response = make_response(jsonify({"message": "Token refreshed"}), 200)
+        response.set_cookie(
+            'access_token_cookie', 
+            new_access_token, 
+            httponly=True, 
+            secure=True,
+            samesite='Lax',
+            max_age=900
+        )
+        
+        return response
+    except Exception as e:
+        print(f"Refresh error: {str(e)}")
+        return jsonify({"error": "Token refresh failed"}), 401
 
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def get_current_user():
-    current_user_id = get_jwt_identity()
-    user = User.query.get(int(current_user_id))
-    
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-    
-    return jsonify({'user': user.to_dict()}), 200
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(int(current_user_id))
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        return jsonify({'user': user.to_dict()}), 200
+    except Exception as e:
+        print(f"Get current user error: {str(e)}")
+        return jsonify({'error': 'Failed to get user'}), 401
 
 @auth_bp.route('/change-password', methods=['POST'])
 @jwt_required()
@@ -259,12 +244,12 @@ def change_password():
         
     except Exception as e:
         db.session.rollback()
+        print(f"Change password error: {str(e)}")
         return jsonify({'error': 'Password change failed'}), 500
 
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
     response = make_response(jsonify({"message": "Logged out successfully"}), 200)
-    response.set_cookie('access_token', '', expires=0)
-    response.set_cookie('refresh_token', '', expires=0)
-    response.set_cookie('csrf_token', '', expires=0)
+    response.set_cookie('access_token_cookie', '', expires=0)
+    response.set_cookie('refresh_token_cookie', '', expires=0)
     return response
