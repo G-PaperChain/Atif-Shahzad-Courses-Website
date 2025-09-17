@@ -20,11 +20,11 @@ export const useAuth = () => {
 // Helper function to decode JWT and check expiration
 const isTokenExpired = (token) => {
   if (!token) return true;
-  
+
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const currentTime = Date.now() / 1000;
-    
+
     // Check if token expires within next 5 minutes (300 seconds buffer)
     return payload.exp < (currentTime + 300);
   } catch (error) {
@@ -36,11 +36,11 @@ const isTokenExpired = (token) => {
 // Helper function to check if refresh token is expired
 const isRefreshTokenExpired = (token) => {
   if (!token) return true;
-  
+
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const currentTime = Date.now() / 1000;
-    
+
     // No buffer for refresh token - check exact expiration
     return payload.exp < currentTime;
   } catch (error) {
@@ -55,6 +55,18 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+
+
+  useEffect(() => {
+    console.log('🔄 AuthContext State:', {
+      user: user ? { id: user.id, name: user.name, email: user.email } : null,
+      loading,
+      isInitialized,
+      hasAccessToken: !!localStorage.getItem("access_token"),
+      hasRefreshToken: !!localStorage.getItem("refresh_token")
+    });
+  }, [user, loading, isInitialized]);
+
 
   const api = useMemo(() => {
     return axios.create({
@@ -84,7 +96,7 @@ export const AuthProvider = ({ children }) => {
 
   const refreshAccessToken = useCallback(async () => {
     const refreshToken = localStorage.getItem("refresh_token");
-    
+
     if (!refreshToken || isRefreshTokenExpired(refreshToken)) {
       logout();
       throw new Error("No valid refresh token");
@@ -101,7 +113,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     isRefreshing.current = true;
-    
+
     try {
       const refreshRes = await axios.post(
         `${API_BASE}/refresh`,
@@ -119,7 +131,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("access_token", newAccessToken);
       onRefreshed(newAccessToken);
-      
+
       return newAccessToken;
     } catch (err) {
       console.error("Token refresh failed:", err);
@@ -137,7 +149,7 @@ export const AuthProvider = ({ children }) => {
     const reqId = api.interceptors.request.use(
       async (config) => {
         let token = localStorage.getItem("access_token");
-        
+
         // Check if token is expired and refresh if needed
         if (token && isTokenExpired(token)) {
           try {
@@ -148,11 +160,11 @@ export const AuthProvider = ({ children }) => {
             console.error("Failed to refresh token in request interceptor:", error);
           }
         }
-        
+
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
-        
+
         return config;
       },
       (error) => Promise.reject(error)
@@ -167,7 +179,7 @@ export const AuthProvider = ({ children }) => {
 
         if (status === 401 && originalRequest && !originalRequest._retry) {
           originalRequest._retry = true;
-          
+
           try {
             const newToken = await refreshAccessToken();
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
@@ -188,39 +200,53 @@ export const AuthProvider = ({ children }) => {
     };
   }, [api, refreshAccessToken]);
 
-  // Enhanced user fetch with better error handling
+
+
   const fetchCurrentUser = useCallback(async () => {
     const accessToken = localStorage.getItem("access_token");
     const refreshToken = localStorage.getItem("refresh_token");
-    
+
+    console.log('🔍 fetchCurrentUser called:', {
+      hasAccessToken: !!accessToken,
+      hasRefreshToken: !!refreshToken,
+      accessTokenExpired: accessToken ? isTokenExpired(accessToken) : 'no token',
+      refreshTokenExpired: refreshToken ? isRefreshTokenExpired(refreshToken) : 'no token'
+    });
+
     // If no tokens exist, user is not logged in
     if (!accessToken && !refreshToken) {
+      console.log('❌ No tokens found - user not logged in');
       setLoading(false);
       setIsInitialized(true);
       return;
     }
-    
+
     // If refresh token is expired, logout immediately
     if (refreshToken && isRefreshTokenExpired(refreshToken)) {
+      console.log('❌ Refresh token expired - logging out');
       logout();
       setLoading(false);
       return;
     }
-    
+
     try {
+      console.log('🚀 Making /me request...');
       const res = await api.get("/me");
+      console.log('✅ /me request successful:', res.data.user);
       setUser(res.data.user || null);
     } catch (err) {
-      console.error("fetchCurrentUser error:", err?.response?.data || err);
-      
+      console.error("❌ fetchCurrentUser error:", err?.response?.data || err);
+
       // Only logout if it's not a network error
       if (err?.response?.status === 401 || err?.response?.status === 403) {
+        console.log('🚪 Logging out due to auth error');
         logout();
       } else {
         // For network errors, keep user logged in but show they're offline
-        console.warn("Network error while fetching user, keeping logged in");
+        console.warn("🌐 Network error while fetching user, keeping logged in");
       }
     } finally {
+      console.log('🏁 fetchCurrentUser finished');
       setLoading(false);
       setIsInitialized(true);
     }
@@ -237,7 +263,7 @@ export const AuthProvider = ({ children }) => {
     const interval = setInterval(() => {
       const accessToken = localStorage.getItem("access_token");
       const refreshToken = localStorage.getItem("refresh_token");
-      
+
       if (accessToken && refreshToken && !isRefreshTokenExpired(refreshToken)) {
         // If access token will expire in next 5 minutes, refresh it
         if (isTokenExpired(accessToken)) {
