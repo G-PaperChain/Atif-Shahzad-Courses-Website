@@ -15,42 +15,60 @@ const NCAAA_CourseList = () => {
     const fetchNcaaCourses = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('https://api.dratifshahzad.com/api/ncaaa')
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch courses');
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                setNcaaa_courses(data.courses);
+            setError(null);
+            
+            const response = await axios.get('https://api.dratifshahzad.com/api/ncaaa');
+            
+            if (response.data.success) {
+                setNcaaa_courses(response.data.courses);
             } else {
-                setError(data.error);
+                setError(response.data.error || 'Failed to fetch courses');
             }
 
         } catch (err) {
-            setError(err.message);
+            console.error('Error fetching courses:', err);
+            setError(err.response?.data?.error || err.message || 'Failed to fetch courses');
         } finally {
             setLoading(false);
         }
     }
 
-    if (loading) return <div className="loading"><CircularProgress />Loading courses...</div>;
-    if (error) return <div className="error">Error: {error}</div>;
+    if (loading) return (
+        <div className="flex items-center justify-center gap-2">
+            <CircularProgress size={20} />
+            <span>Loading courses...</span>
+        </div>
+    );
+    
+    if (error) return (
+        <div className="text-red-600 text-center">
+            Error: Failed to fetch courses
+            <button 
+                onClick={fetchNcaaCourses}
+                className="ml-2 px-3 py-1 bg-red-100 hover:bg-red-200 rounded text-sm"
+            >
+                Retry
+            </button>
+        </div>
+    );
+
+    if (ncaaa_courses.length === 0) return (
+        <div className="text-gray-600 text-center">No courses found</div>
+    );
 
     return (
-        <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
             {
-                courses.map((course) => (
-                    <div className="card w-96 min-h-max overflow-hidden bg-green-200 flex flex-col p-4 cursor-pointer transition-all duration-200 hover:bg-green- rounded-xl" key={course.course_id}>
+                ncaaa_courses.map((course) => (
+                    <div className="card w-96 min-h-max overflow-hidden bg-green-200 flex flex-col p-4 cursor-pointer transition-all duration-200 hover:bg-green-300 rounded-xl" key={course.course_id}>
                         <h1 className="text-xl text-green-800 font-black">{course.course_code}</h1>
                         <h2 className="text-3xl text-green-700 font-medium">{course.course_name}</h2>
-                        <h3 className="text-green-700 bg-green-300 w-max px-1.5 rounded-full mt-2.5">{course.course_type || '🌀core'}</h3>
-                        <button className="text-lg cursor-pointer text-white font-normal w-1/2 py-1 px-2 rounded-lg hover:bg-green-800 bg-green-700 transition-all duration-200 mt-5">Add Course Data</button>
+                        <h3 className="text-green-700 bg-green-300 w-max px-1.5 rounded-full mt-2.5">
+                            {course.course_type || '🌀core'}
+                        </h3>
+                        <button className="text-lg cursor-pointer text-white font-normal w-1/2 py-1 px-2 rounded-lg hover:bg-green-800 bg-green-700 transition-all duration-200 mt-5">
+                            Add Course Data
+                        </button>
                     </div>
                 ))
             }
