@@ -141,7 +141,7 @@ const Navbar = () => {
             <Link to={'/'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Home</li></Link>
             <Link to={'/courses'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Courses</li></Link>
             <Link to={'/'} className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>About</Link>
-            <li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Contact</li>
+            <Link className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Contact</Link>
           </ul>
         </div>
       </Sidebar>
@@ -150,8 +150,8 @@ const Navbar = () => {
         <ul className="flex gap-9 items-center justify-center">
           <Link to={'/'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Home</li></Link>
           <Link to={'/courses'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Courses</li></Link>
-          <li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>About</li>
-          <li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Contact</li>
+          <Link to={'/ncaaa'} className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>NCAAA Courses</Link>
+          <Link to={'/'} className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>About</Link>
         </ul>
       </div>
 

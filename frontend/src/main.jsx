@@ -8,6 +8,7 @@ import AdminPanel from './Components/AdminComponents/AdminPanel.jsx';
 import { AuthProvider } from './Components/AuthComponents/AuthContext.jsx';
 import Layout from './Components/Layout.jsx';
 import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
+import NCAAA_Page from './Components/NCAAA_Components/NCAAA_Page.jsx';
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
       { index: true, element: <App /> },
       { path: "courses", element: <Courses /> },
       { path: "admin", element: <AdminPanel /> },
+      { path: "ncaaa", element: <NCAAA_Page /> }
     ],
   },
 ]);

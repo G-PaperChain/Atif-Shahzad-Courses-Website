@@ -85,9 +85,11 @@ def create_app():
     # Register blueprints with API prefix
     from app.routes.auth import auth_bp
     from app.routes.courses import courses_bp
+    from app.routes.ncaaa_courses import ncaaa_courses_bp
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(courses_bp, url_prefix='/api')
+    app.register_blueprint(ncaaa_courses_bp, url_prefix='/api')
 
-    csrf.exempt(auth_bp)  
+    csrf.exempt(auth_bp)
     
     return app
