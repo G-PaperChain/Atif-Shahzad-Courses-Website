@@ -75,7 +75,7 @@ const Navbar = () => {
       return (
         <div className="flex items-center justify-center w-full">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-700"></div>
-          <span className="ml-2 text-green-600">Loading...</span>
+          <span className="ml-2 text-green-600 max-sm:text-xs">Loading...</span>
         </div>
       );
     }
@@ -83,12 +83,12 @@ const Navbar = () => {
     if (user) {
       return (
         <div className="flex items-center space-x-4 col-start-3 w-full">
-          <span className="text-green-700 font-medium">
+          <span className="text-green-700 font-medium max-sm:text-xs">
             Welcome, {user?.username || user?.name || "User"}!
           </span>
           <button
             onClick={logout}
-            className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-xs font-medium cursor-pointer ml-1.4"
+            className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-xs font-medium cursor-pointer ml-1.4 max-sm:px-2 max-sm:py-1 max-sm:ml-0.4"
           >
             Logout
           </button>

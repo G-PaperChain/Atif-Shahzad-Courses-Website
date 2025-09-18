@@ -47,8 +47,8 @@ const MidContent = () => {
     return (
         <div className='flex flex-col z-0 h-max items-center'>
 
-            <h1 className="text-5xl max-sm:text-3xl font-bold flex justify-center mt-10 max-sm:mt-5 text-transparent bg-clip-text bg-gradient-to-b from-green-800 to-green-500 p-2 max-sm:p-0 max-sm:flex-col items-center max:sm:w-max max-[770px]:w-max max-[770px]:place-self-center-safe">
-                <HiMiniSparkles className='text-amber-500 mr-2.5 text-3xl max-sm:text-xl max-sm:mr-0.5 cursor-pointer transition-all duration-150 hover:text-amber-400 max-sm:place-self-start max-sm:-ml-3' />
+            <h1 className="text-5xl max-sm:text-3xl font-bold flex justify-center mt-10 max-sm:mt-5 text-transparent bg-clip-text bg-gradient-to-b from-green-800 to-green-500 p-2 max-sm:p-0 max-sm:flex-col items-center  max:sm:w-max max-[770px]:w-max max-[770px]:place-center-safe max-sm:text-center">
+                <HiMiniSparkles className='text-amber-500 mr-2.5 text-3xl max-sm:text-xl max-sm:mr-0.5 cursor-pointer transition-all duration-150 hover:text-amber-400 max-sm:place-self-start max-sm:-ml-3 ' />
                 <p className=''>Your gateway to&nbsp;</p>
                 <span
                     className="typing-effect"
@@ -62,10 +62,10 @@ const MidContent = () => {
 
             {/* Actual hero */}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 mt-4 lg:mt-8 h-full z-50">
+            <div className="grid grid-cols-1 lg:grid-cols-3 mt-4 lg:mt-8 h-full z-50 max-sm:gap-5">
 
-                <div className="flex justify-center items-center p-4 flex-col gap-2">
-                    <p className="text-green-700 text-xl font-semibold text-center bg-green-200 px-4 w-1/2 py-5 rounded-2xl">
+                <div className="flex justify-center items-center p-4 flex-col gap-2 max-sm:row-start-3 bg-green-200 max-sm:w-4/5 max-sm:p-2 place-self-center w-3/5">
+                    <p className="text-green-700 text-xl font-semibold text-center px-3 py-1 rounded-2xl max-sm:w-full max-sm:py-3 max-sm:px-2 md:">
                         "High-quality learning designed to help you achieve your personal and professional goals."
                     </p>
                     <button className=' bg-green-700 border-0 border-gray-900 py-2 px-4 rounded-radius hover:bg-green-800 cursor-pointer text-gray-50 text-lg transition-colors duration-200'
@@ -73,26 +73,27 @@ const MidContent = () => {
                 </div>
 
                 <div className="flex justify-center items-center hover:brightness-105">
-                    <img src={MainImg} className="select-none w-96" />
+                    <img src={MainImg} className="select-none w-96 max-sm:w-56 max-sm:row-start-1" />
                 </div>
 
                 {/* CARDS ON THE RIGHT */}
 
-                <div className='grid grid-cols-2 gap-2 w-max p-2' ref={cards_containerRef}>
+                <div className='grid grid-cols-2 gap-2 w-max p-2 max-sm:row-start-2 max-sm:grid-cols-2 max-sm:w-full max-sm:gap-1 max-sm:p-1' ref={cards_containerRef}>
+
                     <motion.div drag dragConstraints={cards_containerRef} dragElastic={0.1} dragMomentum={false} whileDrag={{ scale: 1.05 }}>
 
-                        <div className=" h-48 w-full flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10"
+                        <div className=" h-48 w-full max-sm:w-base flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3"
                         >
-                            <h2 className='text-4xl'><img src={UniLogo} className="" width={48} />Professor </h2>
-                            <p className='font-light text-right mr-2'>At King Abdul Aziz</p>
-                            <p className='font-light text-right mr-2'>University</p>
+                            <h2 className='text-4xl max-sm:text-2xl'><img src={UniLogo} className="" width={48} />Professor </h2>
+                            <p className='font-light text-right mr-2 max-sm:text-xs'>At King Abdul Aziz</p>
+                            <p className='font-light text-right mr-2 max-sm:text-xs'>University</p>
                         </div>
 
                     </motion.div>
 
                     <motion.div drag dragConstraints={cards_containerRef} dragElastic={0.1} dragMomentum={false} whileDrag={{ scale: 1.05 }}>
 
-                        <div className=" h-48 flex w-full flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 ">
+                        <div className=" h-48 flex w-full flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3">
                             <div className="stars flex text-orange-400 text-3xl">
                                 <MdOutlineStarPurple500 className='cursor-pointer hover:text-orange-600' />
                                 <MdOutlineStarPurple500 className='cursor-pointer hover:text-orange-600' />
@@ -108,7 +109,7 @@ const MidContent = () => {
 
                     <motion.div drag dragConstraints={cards_containerRef} dragElastic={0.1} dragMomentum={false} whileDrag={{ scale: 1.05 }}>
 
-                        <div className=" h-48 w-full flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10">
+                        <div className=" h-48 w-full flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3">
                             <h2 className='text-4xl'><img src={Nantes} className="rounded-rounded-full mb-2" width={40} />(Ph.D.)</h2>
                             <p className='font-light text-right mr-2'>from Nantes Université</p>
                         </div>
@@ -118,7 +119,7 @@ const MidContent = () => {
 
                     <motion.div drag dragConstraints={cards_containerRef} dragElastic={0.1} dragMomentum={false} whileDrag={{ scale: 1.05 }}>
 
-                        <div className=" h-48 w-full flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10">
+                        <div className=" h-48 w-full flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3">
                             <h2 className='text-4xl'><img src={Nantes} className="rounded-rounded-full mb-2" width={40} />(Ph.D.)</h2>
                             <p className='font-light text-right mr-2'>from Nantes Université</p>
                         </div>
@@ -127,7 +128,6 @@ const MidContent = () => {
 
                 </div>
             </div>
-            {/* <img src="/public/bgup.svg" className="fixed -bottom-10 w-full" /> */}
         </div>
     )
 }
