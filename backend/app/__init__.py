@@ -30,15 +30,15 @@ def create_app():
     app.config['JWT_TOKEN_LOCATION'] = ['cookies']
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=7)
-    app.config['JWT_COOKIE_SECURE'] = True  # Only send over HTTPS
+    app.config['JWT_COOKIE_SECURE'] = True
     app.config['JWT_COOKIE_HTTPONLY'] = True
     app.config['JWT_COOKIE_SAMESITE'] = 'Lax'
     app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token_cookie'
     app.config['JWT_REFRESH_COOKIE_NAME'] = 'refresh_token_cookie'
-    app.config['JWT_CSRF_IN_COOKIES'] = False  # We'll handle CSRF separately
+    app.config['JWT_CSRF_IN_COOKIES'] = False
 
     app.config['WTF_CSRF_ENABLED'] = True
-    app.config['WTF_CSRF_CHECK_DEFAULT'] = False  # We'll enable CSRF per route
+    app.config['WTF_CSRF_CHECK_DEFAULT'] = False
     
 
     # Validate env vars

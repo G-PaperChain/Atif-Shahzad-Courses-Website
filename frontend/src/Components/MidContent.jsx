@@ -47,7 +47,7 @@ const MidContent = () => {
     return (
         <div className='flex flex-col z-0 h-max items-center'>
 
-            <h1 className="text-5xl max-sm:text-3xl font-bold flex justify-center mt-10 max-sm:mt-5 text-transparent bg-clip-text bg-gradient-to-b from-green-800 to-green-500 p-2 max-sm:p-0 max-sm:flex-col items-center  max:sm:w-max max-[770px]:w-max max-[770px]:place-center-safe max-sm:text-center">
+            <h1 className="text-5xl max-sm:text-3xl font-bold flex justify-center mt-10 max-sm:mt-5 text-transparent bg-clip-text bg-gradient-to-b from-green-800 to-green-500 p-2 max-sm:p-0 max-sm:flex-col items-center  max:sm:w-max max-[770px]:w-max max-[770px]:place-center-safe max-sm:text-center ">
                 <HiMiniSparkles className='text-amber-500 mr-2.5 text-3xl max-sm:text-xl max-sm:mr-0.5 cursor-pointer transition-all duration-150 hover:text-amber-400 max-sm:place-self-start max-sm:-ml-3 ' />
                 <p className=''>Your gateway to&nbsp;</p>
                 <span
@@ -64,7 +64,7 @@ const MidContent = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 mt-4 lg:mt-8 h-full z-50 max-sm:gap-5">
 
-                <div className="flex justify-center items-center p-4 flex-col gap-2 max-sm:row-start-3 bg-green-200 max-sm:w-4/5 max-sm:p-2 place-self-center w-3/5">
+                <div className="flex justify-center items-center p-4 flex-col gap-2 max-sm:row-start-3 bg-green-200 max-sm:w-4/5 max-sm:p-2 place-self-center w-3/5 rounded-2xl">
                     <p className="text-green-700 text-xl font-semibold text-center px-3 py-1 rounded-2xl max-sm:w-full max-sm:py-3 max-sm:px-2 md:">
                         "High-quality learning designed to help you achieve your personal and professional goals."
                     </p>
@@ -78,7 +78,7 @@ const MidContent = () => {
 
                 {/* CARDS ON THE RIGHT */}
 
-                <div className='grid grid-cols-2 gap-2 w-max p-2 max-sm:row-start-2 max-sm:grid-cols-2 max-sm:w-full max-sm:gap-1 max-sm:p-1' ref={cards_containerRef}>
+                <div className='grid grid-cols-2 gap-2 w-max p-2 max-sm:row-start-2 max-sm:grid-cols-2 max-sm:w-full max-sm:gap-1 max-sm:p-1 min-xl:p-0' ref={cards_containerRef}>
 
                     <motion.div drag dragConstraints={cards_containerRef} dragElastic={0.1} dragMomentum={false} whileDrag={{ scale: 1.05 }}>
 
