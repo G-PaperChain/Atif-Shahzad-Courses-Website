@@ -62,7 +62,7 @@ const NCAAA_CourseList = () => {
                 ncaaa_courses.map((course) => (
                     <div className="card w-96 min-h-max overflow-hidden bg-green-200 flex flex-col p-4 cursor-pointer transition-all duration-200 hover:bg-green-300 rounded-xl" key={course.course_id}>
                         <h1 className="text-xl text-green-800 font-black">{course.course_code}</h1>
-                        <h2 className="text-3xl text-green-700 font-medium">{course.course_name}</h2>
+                        <h2 className="text-2xl text-green-700 font-medium">{course.course_name}</h2>
                         <h3 className="text-green-700 bg-green-300 w-max px-1.5 rounded-full mt-2.5">
                             {course.course_type || '🌀core'}
                         </h3>

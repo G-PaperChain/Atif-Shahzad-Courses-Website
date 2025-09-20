@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.models.Course import Course  # FIXED IMPORT PATH
-from app.services.utils import admin_required  # FIXED IMPORT PATH
+from app.models.Course import Course
+from app.services.utils import admin_required
 
 courses_bp = Blueprint('courses', __name__)
 
@@ -31,5 +31,3 @@ def add_course():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
-    
