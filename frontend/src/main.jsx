@@ -9,6 +9,7 @@ import { AuthProvider } from './Components/AuthComponents/AuthContext.jsx';
 import Layout from './Components/Layout.jsx';
 import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
 import NCAAA_Page from './Components/NCAAA_Components/NCAAA_Page.jsx';
+import Course from './Components/CoursesComponents/Course.jsx';
 
 const router = createBrowserRouter([
   {
@@ -18,7 +19,8 @@ const router = createBrowserRouter([
       { index: true, element: <App /> },
       { path: "courses", element: <Courses /> },
       { path: "admin", element: <AdminPanel /> },
-      { path: "ncaaa", element: <NCAAA_Page /> }
+      { path: "ncaaa", element: <NCAAA_Page /> },
+      { path: "course", element : <Course />}
     ],
   },
 ]);

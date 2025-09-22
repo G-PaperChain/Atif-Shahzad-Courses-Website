@@ -14,6 +14,15 @@ const MidContent = () => {
     const [displayed, setDisplayed] = useState("");
     const [typing, setTyping] = useState(true);
     const cards_containerRef = useRef(null)
+    const [isDragging, setIsDragging] = useState(false);
+
+    const handleDragStart = () => {
+        setIsDragging(true);
+    };
+
+    const handleDragEnd = () => {
+        setIsDragging(false);
+    };
 
     const longestWordLength = useMemo(
         () => Math.max(...words.map(w => w.length)),
@@ -78,40 +87,43 @@ const MidContent = () => {
 
                 {/* CARDS ON THE RIGHT */}
 
-                <div className='grid grid-cols-2 gap-2 w-max p-2 max-sm:row-start-2 max-sm:grid-cols-2 max-sm:w-full max-sm:gap-1 max-sm:p-1 min-xl:p-0' ref={cards_containerRef}>
+                <div className='grid grid-cols-2 gap-2 w-3/4 p-2 max-sm:row-start-2 max-sm:grid-cols-2 max-sm:w-full max-sm:gap-1 max-sm:p-1 min-xl:p-0 justify-center-safe mx-auto' ref={cards_containerRef}>
 
                     <motion.div drag dragConstraints={cards_containerRef} dragElastic={0.1} dragMomentum={false} whileDrag={{ scale: 1.05 }}>
 
-                        <div className=" h-48 w-full max-sm:w-base flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3"
+                        <div className={`h-48 w-full max-sm:w-base flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3 items-center`}
+                            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+                            onMouseDown={handleDragStart}
+                            onMouseUp={handleDragEnd}
                         >
-                            <h2 className='text-4xl max-sm:text-2xl'><img src={UniLogo} className="" width={48} />Professor </h2>
-                            <p className='font-light text-right mr-2 max-sm:text-xs'>At King Abdul Aziz</p>
-                            <p className='font-light text-right mr-2 max-sm:text-xs'>University</p>
+                            <h2 className='text-3xl max-sm:text-2xl'>Artificial </h2>
+                            <h2 className='text-2xl max-sm:text-xl'>Intelligence</h2>
                         </div>
 
                     </motion.div>
 
                     <motion.div drag dragConstraints={cards_containerRef} dragElastic={0.1} dragMomentum={false} whileDrag={{ scale: 1.05 }}>
 
-                        <div className=" h-48 flex w-full flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3">
-                            <div className="stars flex text-orange-400 text-3xl">
-                                <MdOutlineStarPurple500 className='cursor-pointer hover:text-orange-600' />
-                                <MdOutlineStarPurple500 className='cursor-pointer hover:text-orange-600' />
-                                <MdOutlineStarPurple500 className='cursor-pointer hover:text-orange-600' />
-                                <MdOutlineStarPurple500 className='cursor-pointer hover:text-orange-600' />
-                                <MdOutlineStarPurple500 className='cursor-pointer hover:text-orange-600' />
-                            </div>
-                            <h2 className='text-4xl'>15 Years</h2>
-                            <p className='font-light text-right mr-2'>Experience</p>
+                        <div className=" h-48 flex w-full flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3 items-center"
+                            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+                            onMouseDown={handleDragStart}
+                            onMouseUp={handleDragEnd}
+                        >
+                            <h2 className='text-3xl max-sm:text-2xl'>Engineering </h2>
+                            <h2 className='text-2xl  max-sm:text-xl'>Economics</h2>
                         </div>
 
                     </motion.div>
 
                     <motion.div drag dragConstraints={cards_containerRef} dragElastic={0.1} dragMomentum={false} whileDrag={{ scale: 1.05 }}>
 
-                        <div className=" h-48 w-full flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3">
-                            <h2 className='text-4xl'><img src={Nantes} className="rounded-rounded-full mb-2" width={40} />(Ph.D.)</h2>
-                            <p className='font-light text-right mr-2'>from Nantes Université</p>
+                        <div className=" h-48 w-full flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3 items-center"
+                            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+                            onMouseDown={handleDragStart}
+                            onMouseUp={handleDragEnd}
+                        >
+                            <h2 className='text-3xl max-sm:text-2xl'>Project</h2>
+                            <h2 className='text-2xl max-sm:text-xl'>Management</h2>
                         </div>
 
                     </motion.div>
@@ -119,9 +131,13 @@ const MidContent = () => {
 
                     <motion.div drag dragConstraints={cards_containerRef} dragElastic={0.1} dragMomentum={false} whileDrag={{ scale: 1.05 }}>
 
-                        <div className=" h-48 w-full flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3">
-                            <h2 className='text-4xl'><img src={Nantes} className="rounded-rounded-full mb-2" width={40} />(Ph.D.)</h2>
-                            <p className='font-light text-right mr-2'>from Nantes Université</p>
+                        <div className=" h-48 w-full flex flex-col bg-green-200 px-6 py-12 rounded-2xl hover:bg-green-300 cursor-grab justify-center transition-all duration-500 ease-in-out transform hover:scale-105 z-10 max-sm:py-6 max-sm:px-3 items-center"
+                            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+                            onMouseDown={handleDragStart}
+                            onMouseUp={handleDragEnd}
+                        >
+                            <h2 className='text-3xl max-sm:text-2xl'>Computer</h2>
+                            <h2 className='text-2xl  max-sm:text-xl'>Application</h2>
                         </div>
 
                     </motion.div>
