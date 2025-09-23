@@ -86,6 +86,14 @@ const Navbar = () => {
           <span className="text-green-700 font-medium max-sm:text-xs">
             Welcome, {user?.username || user?.name || "User"}!
           </span>
+          {user.role === 'admin' && (
+            <Link
+              to="/admin"
+              className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-xs font-medium cursor-pointer"
+            >
+              Admin Panel
+            </Link>
+          )}
           <button
             onClick={logout}
             className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-xs font-medium cursor-pointer ml-1.4 max-sm:px-2 max-sm:py-1 max-sm:ml-0.4"
@@ -109,9 +117,9 @@ const Navbar = () => {
         <button
           ref={signupBtnRef}
           className="btn bg-green-700 py-2 px-4 rounded-radius hover:bg-green-800 cursor-pointer text-gray-50 text-xs transition-colors duration-200 rounded-sm h-max max-sm:py-1 max-sm:px-2"
-          onClick={toggleSignup}
+
         >
-          Sign Up
+          Contact us
         </button>
       </div>
     );
@@ -140,6 +148,8 @@ const Navbar = () => {
           <ul className="flex gap-4 items-center justify-center flex-col mt-10">
             <Link to={'/'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Home</li></Link>
             <Link to={'/courses'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Courses</li></Link>
+            {user && user.role === 'admin' && (
+              <Link to={'/admin'}><li className='text-blue-600 cursor-pointer hover:text-blue-800 font-semibold hover:underline transition-colors duration-200'>Admin Panel</li></Link>)}
             <Link to={'/'} className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>About</Link>
             <Link className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Contact</Link>
           </ul>
@@ -151,6 +161,8 @@ const Navbar = () => {
           <Link to={'/'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Home</li></Link>
           <Link to={'/courses'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Courses</li></Link>
           <Link to={'/ncaaa'} className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>NCAAA Courses</Link>
+          {user && user.role === 'admin' && (
+            <Link to={'/admin'}><li className='text-blue-600 cursor-pointer hover:text-blue-800 font-semibold hover:underline transition-colors duration-200'>Admin Panel</li></Link>)}
           <Link to={'/'} className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>About</Link>
         </ul>
       </div>

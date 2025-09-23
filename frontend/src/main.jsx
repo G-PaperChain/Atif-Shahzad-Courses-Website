@@ -10,6 +10,7 @@ import Layout from './Components/Layout.jsx';
 import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
 import NCAAA_Page from './Components/NCAAA_Components/NCAAA_Page.jsx';
 import Course from './Components/CoursesComponents/Course.jsx';
+import ProtectedRoute from './Components/ProtectedRoute.jsx';
 
 const router = createBrowserRouter([
   {
@@ -18,9 +19,16 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <App /> },
       { path: "courses", element: <Courses /> },
-      { path: "admin", element: <AdminPanel /> },
+      {
+        path: "admin",
+        element: (
+          <ProtectedRoute requiredRole="admin">
+            <AdminPanel />
+          </ProtectedRoute>
+        )
+      },
       { path: "ncaaa", element: <NCAAA_Page /> },
-      { path: "course", element : <Course />}
+      { path: "course", element: <Course /> }
     ],
   },
 ]);
@@ -33,5 +41,4 @@ createRoot(document.getElementById('root')).render(
       </StrictMode>
     </AuthProvider>
   </PrimeReactProvider>
-
 )
