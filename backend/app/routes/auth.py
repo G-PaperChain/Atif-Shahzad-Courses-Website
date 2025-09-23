@@ -23,7 +23,7 @@ def validate_password(password):
         return False
     return True
 
-# CSRF token endpoint
+
 @auth_bp.route('/csrf-token', methods=['GET'])
 def get_csrf_token():
     token = generate_csrf()
@@ -42,7 +42,6 @@ def register():
     try:
         data = request.get_json()
         
-        # Validation
         required_fields = ['email', 'password', 'name']
         for field in required_fields:
             if not data.get(field):
@@ -57,11 +56,9 @@ def register():
         if not validate_password(password):
             return jsonify({'error': 'Password must be at least 8 characters with uppercase, lowercase, and number'}), 400
         
-        # Check if user exists
         if User.query.filter_by(email=email).first():
             return jsonify({'error': 'Email already registered'}), 409
         
-        # Create user
         password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
         user = User(
             email=email,
@@ -72,38 +69,37 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        # Create tokens
         access_token = create_access_token(
-            identity=str(user.id),
+            identity=str(user.uid), 
             additional_claims={"role": user.role}
         )
         refresh_token = create_refresh_token(
-            identity=str(user.id)
+            identity=str(user.uid)
         )
         
-        # Create response with HttpOnly cookies
         response = make_response(jsonify({
             'message': 'User registered successfully',
             'user': user.to_dict()
         }), 201)
+
+        print(f"Setting cookies for user: {user.uid}")
         
-        # Set secure, HttpOnly cookies with correct names
         response.set_cookie(
-            'access_token_cookie',  # Flask-JWT-Extended default name
+            'access_token_cookie',  
             access_token, 
             httponly=True, 
             secure=True,
             samesite='Lax',
-            max_age=900  # 15 minutes
+            max_age=900  
         )
         
         response.set_cookie(
-            'refresh_token_cookie',  # Flask-JWT-Extended default name
+            'refresh_token_cookie',  
             refresh_token, 
             httponly=True,
             secure=True,
             samesite='Lax',
-            max_age=604800  # 7 days
+            max_age=604800  
         )
         
         return response
@@ -132,38 +128,36 @@ def login():
         if not user.is_active:
             return jsonify({'error': 'Account deactivated'}), 401
         
-        # Create tokens
         access_token = create_access_token(
-            identity=str(user.id), 
+            identity=str(user.uid), 
             additional_claims={"role": user.role}
         )
         refresh_token = create_refresh_token(
-            identity=str(user.id)
+            identity=str(user.uid)
         )
         
-        # Create response with HttpOnly cookies
         response = make_response(jsonify({
             'message': 'Login successful',
             'user': user.to_dict()
         }), 200)
         
-        # Set secure, HttpOnly cookies with correct names
+        
         response.set_cookie(
-            'access_token_cookie',  # Flask-JWT-Extended default name
+            'access_token_cookie',  
             access_token, 
             httponly=True, 
             secure=True,
             samesite='Lax',
-            max_age=900  # 15 minutes
+            max_age=900  
         )
         
         response.set_cookie(
-            'refresh_token_cookie',  # Flask-JWT-Extended default name
+            'refresh_token_cookie',  
             refresh_token, 
             httponly=True,
             secure=True,
             samesite='Lax',
-            max_age=604800  # 7 days
+            max_age=604800  
         )
         
         return response
@@ -181,9 +175,9 @@ def refresh():
         if not user:
             return jsonify({"error": "User not found"}), 404
 
-        # Create new access token
+        
         new_access_token = create_access_token(
-            identity=str(user.id),
+            identity=str(user.uid),
             additional_claims={"role": user.role}
         )
         

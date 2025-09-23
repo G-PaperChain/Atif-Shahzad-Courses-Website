@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from datetime import date
 from .associations import enrollments
 
 class User(db.Model):
@@ -12,7 +12,7 @@ class User(db.Model):
     name = db.Column(db.String(50), nullable=False)
     role = db.Column(db.String(20), default='student')
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.now)
+    created_at = db.Column(db.Date, default=date.today)
 
     courses = db.relationship(
         "Course",
