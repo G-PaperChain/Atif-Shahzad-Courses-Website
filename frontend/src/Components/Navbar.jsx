@@ -37,41 +37,38 @@ const Navbar = () => {
   }
 
   useEffect(() => {
-    // const handleDocClick = (e) => {
-    // const t = e.target
-    // if (!(showLoginDropdown || showSignupDropdown)) return
+    const handleDocClick = (e) => {
+      const t = e.target
+      if (!(showLoginDropdown || showSignupDropdown)) return
 
-    // const clickedInsideLogin = loginDropdownRef.current && loginDropdownRef.current.contains(t)
-    // const clickedInsideSignup = signupDropdownRef.current && signupDropdownRef.current.contains(t)
-    // const clickedLoginBtn = loginBtnRef.current && loginBtnRef.current.contains(t)
-    // const clickedSignupBtn = signupBtnRef.current && signupBtnRef.current.contains(t)
+      const clickedInsideLogin = loginDropdownRef.current && loginDropdownRef.current.contains(t)
+      const clickedInsideSignup = signupDropdownRef.current && signupDropdownRef.current.contains(t)
+      const clickedLoginBtn = loginBtnRef.current && loginBtnRef.current.contains(t)
+      const clickedSignupBtn = signupBtnRef.current && signupBtnRef.current.contains(t)
 
-    // if (!clickedInsideLogin && !clickedInsideSignup && !clickedLoginBtn && !clickedSignupBtn) {
-    //   setShowLoginDropdown(false)
-    //   setShowSignupDropdown(false)
-    // }
+      if (!clickedInsideLogin && !clickedInsideSignup && !clickedLoginBtn && !clickedSignupBtn) {
+        setShowLoginDropdown(false)
+        setShowSignupDropdown(false)
+      }
+    }
 
-    //   console.log('Click detected, but dropdown staying open for testing');
-    //   return;
-    // }
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        setShowLoginDropdown(false)
+        setShowSignupDropdown(false)
+      }
+    }
 
-    // const handleEsc = (e) => {
-    //   if (e.key === 'Escape') {
-    //     setShowLoginDropdown(false)
-    //     setShowSignupDropdown(false)
-    //   }
-    // }
+    document.addEventListener('mousedown', handleDocClick)
+    document.addEventListener('touchstart', handleDocClick)
+    document.addEventListener('keydown', handleEsc)
 
-    // document.addEventListener('mousedown', handleDocClick)
-    // document.addEventListener('touchstart', handleDocClick)
-    // document.addEventListener('keydown', handleEsc)
+    return () => {
+      document.removeEventListener('mousedown', handleDocClick)
+      document.removeEventListener('touchstart', handleDocClick)
+      document.removeEventListener('keydown', handleEsc)
 
-    // return () => {
-    //   document.removeEventListener('mousedown', handleDocClick)
-    //   document.removeEventListener('touchstart', handleDocClick)
-    //   document.removeEventListener('keydown', handleEsc)
-    // 
-    // }
+    }
 
     // DEPENDENCY =  [showLoginDropdown, showSignupDropdown]
 
