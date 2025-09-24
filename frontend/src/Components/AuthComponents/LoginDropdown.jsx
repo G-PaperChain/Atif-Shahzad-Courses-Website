@@ -11,7 +11,7 @@ const LoginDropdown = (props) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
+        // setError('');
 
         const result = await login(formData.email, formData.password);
 
