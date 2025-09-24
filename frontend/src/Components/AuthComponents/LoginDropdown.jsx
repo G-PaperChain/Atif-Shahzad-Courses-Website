@@ -82,9 +82,22 @@ const LoginDropdown = (props) => {
                         />
                     </div>
 
+                    <p style={{ color: 'blue', fontSize: '12px' }}>
+                        Debug: Error = "{error}" | Length = {error ? error.length : 0}
+                    </p>
+
                     {error && (
-                        <div className="bg-red-50 border border-red-300 text-red-800 px-3 py-2 rounded-md mb-4 block">
-                            <p className="text-sm font-medium">{error}</p>
+                        <div style={{
+                            backgroundColor: '#fef2f2',
+                            border: '2px solid #ef4444',
+                            color: '#dc2626',
+                            padding: '15px',
+                            borderRadius: '8px',
+                            marginBottom: '20px',
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                        }}>
+                            ⚠️ {error}
                         </div>
                     )}
 
