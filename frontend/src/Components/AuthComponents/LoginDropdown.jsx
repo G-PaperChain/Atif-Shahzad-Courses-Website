@@ -13,22 +13,22 @@ const LoginDropdown = (props) => {
         setLoading(true);
         setError('');
 
-        try {
-            const result = await login(formData.email, formData.password);
+        console.log('🔴 LoginDropdown: Starting login with:', formData.email);
 
-            console.log('Login result:', result); // Debug log
+        const result = await login(formData.email, formData.password);
 
-            if (!result.success) {
-                setError(result.error || 'Login failed. Please try again.');
-            } else {
-                setFormData({ email: '', password: '' });
-            }
-        } catch (err) {
-            console.error('Login error:', err);
-            setError('An unexpected error occurred. Please try again.');
-        } finally {
-            setLoading(false);
+        console.log('🟡 LoginDropdown: Login result:', result);
+
+        if (!result.success) {
+            console.log('🔴 LoginDropdown: Setting error to:', result.error);
+            setError(result.error);
+        } else {
+            console.log('🟢 LoginDropdown: Login successful');
+            setFormData({ email: '', password: '' });
         }
+
+        setLoading(false);
+        console.log('🔵 LoginDropdown: After setLoading, error:', error);
     };
 
     const handleChange = (e) => {

@@ -122,13 +122,24 @@ export const AuthProvider = ({ children }) => {
       let errorMessage = "Login failed. Please try again.";
 
       if (err.response) {
-        // Try different possible error message paths
-        errorMessage = err.response.data?.error ||
-          err.response.data?.message ||
-          err.response.data?.detail ||
-          `Server error: ${err.response.status}`;
+        // Try multiple possible error message paths
+        const errorData = err.response.data;
+
+        // Check all possible error message locations
+        errorMessage = errorData?.error ||
+          errorData?.message ||
+          errorData?.msg ||  // Added this line for "msg" field
+          errorData?.detail ||
+          (typeof errorData === 'string' ? errorData : `Invalid credentials (${err.response.status})`);
 
         console.log('AuthContext: Extracted error message:', errorMessage);
+
+        // If no specific message found, provide a generic one based on status code
+        if (!errorMessage || errorMessage.includes('undefined')) {
+          errorMessage = err.response.status === 401
+            ? 'Invalid email or password'
+            : `Login failed (Error ${err.response.status})`;
+        }
       } else if (err.request) {
         errorMessage = "No response from server. Please check your connection.";
       } else {
