@@ -16,6 +16,7 @@ const LoginDropdown = (props) => {
         const result = await login(formData.email, formData.password);
 
         if (!result.success) {
+            alert('Error: ' + result.error);
             setError(result.error);
         }
 

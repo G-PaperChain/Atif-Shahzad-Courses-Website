@@ -70,7 +70,6 @@ export const AuthProvider = ({ children }) => {
       console.error("fetchCurrentUser error:", err?.response?.data || err);
       
       if (err?.response?.status === 401) {
-        // Silent logout without API call to avoid CSRF issues
         setUser(null);
       }
     } finally {

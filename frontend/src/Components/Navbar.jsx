@@ -82,18 +82,10 @@ const Navbar = () => {
 
     if (user) {
       return (
-        <div className="flex items-center space-x-4 col-start-3 w-full">
+        <div className="flex items-center space-x-4 col-start-3 w-full justify-center">
           <span className="text-green-700 font-medium max-sm:text-xs">
             Welcome, {user?.username || user?.name || "User"}!
           </span>
-          {/* {user.role === 'admin' && (
-            <Link
-              to="/admin"
-              className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-xs font-medium cursor-pointer"
-            >
-              Admin Panel
-            </Link>
-          )} */}
           <button
             onClick={logout}
             className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-xs font-medium cursor-pointer ml-1.4 max-sm:px-2 max-sm:py-1 max-sm:ml-0.4"
