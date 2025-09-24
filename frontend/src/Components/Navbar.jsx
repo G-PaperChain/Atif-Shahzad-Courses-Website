@@ -170,7 +170,7 @@ const Navbar = () => {
 
       {renderAuthSection()}
 
-      {!user && !loading && isInitialized && showLoginDropdown && createPortal(
+      {!user && showLoginDropdown && createPortal(
         <div
           ref={loginDropdownRef}
           className="fixed right-16 top-16 z-[9999] pointer-events-auto"
@@ -179,6 +179,7 @@ const Navbar = () => {
         </div>,
         document.body
       )}
+
 
       {!user && !loading && isInitialized && showSignupDropdown && createPortal(
         <div
