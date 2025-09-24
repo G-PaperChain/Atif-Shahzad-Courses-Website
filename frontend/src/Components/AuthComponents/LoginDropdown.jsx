@@ -50,6 +50,7 @@ const LoginDropdown = (props) => {
             shadow-2xl border border-gray-800 w-80
             transition-all duration-300 ease-out transform
             max-sm:px-4 max-sm:py-4 max-sm:right-3 max-sm:w-74'
+            onClick={(e) => e.stopPropagation()} // ADD THIS TO ENTIRE DROPDOWN
         >
             <h2 className="mt-2 text-center text-xl font-bold tracking-tight z-50">
                 Sign in to your account
@@ -100,7 +101,11 @@ const LoginDropdown = (props) => {
                     <div className="pt-2">
                         <button
                             type="button"
-                            onClick={handleSubmit}
+                            onClick={(e) => {
+                                e.stopPropagation(); // STOP THE EVENT FROM BUBBLING
+                                handleSubmit(e);
+                            }}
+
                             className="flex w-full justify-center rounded-lg bg-green-700 px-3 py-2.5 text-sm font-semibold text-white 
                                      hover:bg-green-800 focus:outline-none 
                                      transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]
