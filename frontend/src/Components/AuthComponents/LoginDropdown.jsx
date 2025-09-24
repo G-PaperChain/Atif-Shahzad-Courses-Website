@@ -88,20 +88,6 @@ const LoginDropdown = (props) => {
                         />
                     </div>
 
-                    <p style={{ color: 'blue', fontSize: '12px' }}>
-                        Debug: Error = "{error}" | Length = {error ? error.length : 0}
-                    </p>
-
-                    {error && (
-                        <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 z-50">
-                            <div className="flex items-center">
-                                <span className="text-red-500 mr-2">⚠️</span>
-                                <span className="font-medium">Error:</span>
-                            </div>
-                            <p className="mt-1 text-sm">{error}</p>
-                        </div>
-                    )}
-
                     <div className="pt-2">
                         <button
                             type="submit"
@@ -115,6 +101,16 @@ const LoginDropdown = (props) => {
                         </button>
                     </div>
                 </form>
+
+                {error && (
+                        <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 z-50">
+                            <div className="flex items-center">
+                                <span className="text-red-500 mr-2">⚠️</span>
+                                <span className="font-medium">Error:</span>
+                            </div>
+                            <p className="mt-1 text-sm">{error}</p>
+                        </div>
+                    )}
 
                 <p className="mt-5 text-center text-sm text-gray-400">
                     Not a member?
