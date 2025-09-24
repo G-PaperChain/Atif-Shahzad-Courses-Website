@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   const api = useMemo(() => {
     const instance = axios.create({
       baseURL: API_BASE,
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
       },
       withCredentials: true,
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
       setUser(res.data.user || null);
     } catch (err) {
       console.error("fetchCurrentUser error:", err?.response?.data || err);
-      
+
       if (err?.response?.status === 401) {
         setUser(null);
       }
@@ -98,14 +98,48 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setLoading(true);
+      console.log('AuthContext: Attempting login for:', email);
+
       const res = await api.post("/login", { email, password });
-      setUser(res.data.user || null);
-      return { success: true, user: res.data.user || null };
+      console.log('AuthContext: Login API response:', res.data);
+
+      if (res.data.user) {
+        setUser(res.data.user);
+        console.log('AuthContext: Login successful, user set');
+        return { success: true, user: res.data.user };
+      } else {
+        console.log('AuthContext: No user in response');
+        return { success: false, error: "Invalid response from server" };
+      }
     } catch (err) {
-      const message = err?.response?.data?.error || err.message || "Login failed";
-      return { success: false, error: message };
+      console.error('AuthContext: Login API error:', err);
+
+      // DEBUG: Log the complete error response
+      console.log('AuthContext: Complete error object:', err);
+      console.log('AuthContext: Error response data:', err?.response?.data);
+      console.log('AuthContext: Error response status:', err?.response?.status);
+
+      let errorMessage = "Login failed. Please try again.";
+
+      if (err.response) {
+        // Try different possible error message paths
+        errorMessage = err.response.data?.error ||
+          err.response.data?.message ||
+          err.response.data?.detail ||
+          `Server error: ${err.response.status}`;
+
+        console.log('AuthContext: Extracted error message:', errorMessage);
+      } else if (err.request) {
+        errorMessage = "No response from server. Please check your connection.";
+      } else {
+        errorMessage = err.message || "An unexpected error occurred.";
+      }
+
+      console.log('AuthContext: Returning error:', errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
+      console.log('AuthContext: Login process completed');
     }
   };
 
