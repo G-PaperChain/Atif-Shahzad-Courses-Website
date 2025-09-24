@@ -56,7 +56,7 @@ const LoginDropdown = (props) => {
             </h2>
 
             <div className="mt-6 w-full z-50">
-                <form className="space-y-5" onSubmit={handleSubmit}>
+                <form className="space-y-5">
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium mb-2">
                             Email address
@@ -99,7 +99,8 @@ const LoginDropdown = (props) => {
 
                     <div className="pt-2">
                         <button
-                            type="submit"
+                            type="button"
+                            onClick={handleSubmit}
                             className="flex w-full justify-center rounded-lg bg-green-700 px-3 py-2.5 text-sm font-semibold text-white 
                                      hover:bg-green-800 focus:outline-none 
                                      transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]
