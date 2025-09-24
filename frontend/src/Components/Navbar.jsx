@@ -70,10 +70,7 @@ const Navbar = () => {
 
     }
 
-    // DEPENDENCY =  [showLoginDropdown, showSignupDropdown]
-
-    console.log('🟪 Click-outside handler DISABLED for testing');
-  }, [])
+  }, [showLoginDropdown, showSignupDropdown])
 
   const renderAuthSection = () => {
     if (loading || !isInitialized) {
