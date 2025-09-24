@@ -102,8 +102,7 @@ export const AuthProvider = ({ children }) => {
       setUser(res.data.user || null);
       return { success: true, user: res.data.user || null };
     } catch (err) {
-      const message =
-        err?.response?.data?.error || err.message || "Login failed";
+      const message = err?.response?.data?.error || err.message || "Login failed";
       return { success: false, error: message };
     } finally {
       setLoading(false);

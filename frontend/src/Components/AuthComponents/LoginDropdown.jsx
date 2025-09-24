@@ -11,15 +11,24 @@ const LoginDropdown = (props) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        // setError('');
+        setError('');
 
-        const result = await login(formData.email, formData.password);
+        try {
+            const result = await login(formData.email, formData.password);
 
-        if (!result.success) {
-            setError(result.error);
+            console.log('Login result:', result); // Debug log
+
+            if (!result.success) {
+                setError(result.error || 'Login failed. Please try again.');
+            } else {
+                setFormData({ email: '', password: '' });
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            setError('An unexpected error occurred. Please try again.');
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
     const handleChange = (e) => {
@@ -63,9 +72,6 @@ const LoginDropdown = (props) => {
                             <label htmlFor="password" className="block text-sm font-medium">
                                 Password
                             </label>
-                            {/* <a href="#" className="text-xs font-semibold text-red-400 hover:text-red-300 transition-colors duration-200">
-                                Forgot password?
-                            </a> */}
                         </div>
                         <input
                             id="password"
@@ -87,17 +93,12 @@ const LoginDropdown = (props) => {
                     </p>
 
                     {error && (
-                        <div style={{
-                            backgroundColor: '#fef2f2',
-                            border: '2px solid #ef4444',
-                            color: '#dc2626',
-                            padding: '15px',
-                            borderRadius: '8px',
-                            marginBottom: '20px',
-                            fontSize: '14px',
-                            fontWeight: 'bold'
-                        }}>
-                            ⚠️ {error}
+                        <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 z-50">
+                            <div className="flex items-center">
+                                <span className="text-red-500 mr-2">⚠️</span>
+                                <span className="font-medium">Error:</span>
+                            </div>
+                            <p className="mt-1 text-sm">{error}</p>
                         </div>
                     )}
 
