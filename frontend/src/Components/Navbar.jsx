@@ -45,6 +45,13 @@ const Navbar = () => {
       const clickedInsideSignup = signupDropdownRef.current && signupDropdownRef.current.contains(t)
       const clickedLoginBtn = loginBtnRef.current && loginBtnRef.current.contains(t)
       const clickedSignupBtn = signupBtnRef.current && signupBtnRef.current.contains(t)
+      
+      // ADD THIS: Check if clicking on error message or login form elements
+      const clickedOnError = t.closest && (
+        t.closest('[class*="error"]') ||
+        t.closest('[class*="red"]') ||
+        t.closest('form')
+      )
 
       if (!clickedInsideLogin && !clickedInsideSignup && !clickedLoginBtn && !clickedSignupBtn) {
         setShowLoginDropdown(false)
