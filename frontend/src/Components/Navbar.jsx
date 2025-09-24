@@ -38,25 +38,21 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleDocClick = (e) => {
-      const t = e.target
-      if (!(showLoginDropdown || showSignupDropdown)) return
+      // const t = e.target
+      // if (!(showLoginDropdown || showSignupDropdown)) return
 
-      const clickedInsideLogin = loginDropdownRef.current && loginDropdownRef.current.contains(t)
-      const clickedInsideSignup = signupDropdownRef.current && signupDropdownRef.current.contains(t)
-      const clickedLoginBtn = loginBtnRef.current && loginBtnRef.current.contains(t)
-      const clickedSignupBtn = signupBtnRef.current && signupBtnRef.current.contains(t)
-      
-      // ADD THIS: Check if clicking on error message or login form elements
-      const clickedOnError = t.closest && (
-        t.closest('[class*="error"]') ||
-        t.closest('[class*="red"]') ||
-        t.closest('form')
-      )
+      // const clickedInsideLogin = loginDropdownRef.current && loginDropdownRef.current.contains(t)
+      // const clickedInsideSignup = signupDropdownRef.current && signupDropdownRef.current.contains(t)
+      // const clickedLoginBtn = loginBtnRef.current && loginBtnRef.current.contains(t)
+      // const clickedSignupBtn = signupBtnRef.current && signupBtnRef.current.contains(t)
 
-      if (!clickedInsideLogin && !clickedInsideSignup && !clickedLoginBtn && !clickedSignupBtn) {
-        setShowLoginDropdown(false)
-        setShowSignupDropdown(false)
-      }
+      // if (!clickedInsideLogin && !clickedInsideSignup && !clickedLoginBtn && !clickedSignupBtn) {
+      //   setShowLoginDropdown(false)
+      //   setShowSignupDropdown(false)
+      // }
+
+      console.log('Click detected, but dropdown staying open for testing');
+      return;
     }
 
     const handleEsc = (e) => {
