@@ -11,25 +11,34 @@ const LoginDropdown = (props) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
+        setError(''); // Clear previous errors
 
         console.log('🔴 LoginDropdown: Starting login with:', formData.email);
 
-        const result = await login(formData.email, formData.password);
+        try {
+            const result = await login(formData.email, formData.password);
 
-        console.log('🟡 LoginDropdown: Login result:', result);
+            console.log('🟡 LoginDropdown: Login result:', result);
 
-        if (!result.success) {
-            console.log('🔴 LoginDropdown: Setting error to:', result.error);
-            setError(result.error);
-        } else {
-            console.log('🟢 LoginDropdown: Login successful');
-            setFormData({ email: '', password: '' });
+            if (!result.success) {
+                console.log('🔴 LoginDropdown: Setting error to:', result.error);
+                setError(result.error); // This should work now
+            } else {
+                console.log('🟢 LoginDropdown: Login successful');
+                setFormData({ email: '', password: '' });
+            }
+        } catch (err) {
+            console.error('LoginDropdown: Unexpected error:', err);
+            setError('An unexpected error occurred. Please try again.');
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
-        console.log('🔵 LoginDropdown: After setLoading, error:', error);
     };
+
+    // Add this useEffect to see when error state actually updates
+    useEffect(() => {
+        console.log('🟣 LoginDropdown: Error state changed to:', error);
+    }, [error]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -101,6 +110,17 @@ const LoginDropdown = (props) => {
                         </button>
                     </div>
                 </form>
+
+                <button
+                    type="button"
+                    onClick={() => {
+                        console.log('🧪 Manual error test clicked');
+                        setError('Test error message: ' + new Date().toLocaleTimeString());
+                    }}
+                    className="mt-4 p-2 bg-blue-500 text-white rounded text-xs"
+                >
+                    Test Error Display
+                </button>
 
                 {error && (
                     <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 z-50">
