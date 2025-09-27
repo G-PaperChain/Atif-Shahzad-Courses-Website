@@ -17,6 +17,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
+    errorElement: <div>⚠️ Something went wrong. Please try again later.</div>,
     children: [
       { index: true, element: <App /> },
       { path: "courses", element: <Courses /> },
@@ -29,19 +30,20 @@ const router = createBrowserRouter([
         )
       },
       { path: "ncaaa", element: <NCAAA_Page /> },
-      { path: "course", element: <Course /> }
+      { path: "course/:course_code", element: <Course /> }
     ],
   },
 ]);
 
 createRoot(document.getElementById('root')).render(
-  <PrimeReactProvider>
-    <AuthProvider>
-      <CourseContextProvider>
-        <StrictMode>
+  <StrictMode>
+    <PrimeReactProvider>
+      <AuthProvider>
+        <CourseContextProvider>
           <RouterProvider router={router} />
-        </StrictMode>
-      </CourseContextProvider>
-    </AuthProvider>
-  </PrimeReactProvider>
+        </CourseContextProvider>
+      </AuthProvider>
+    </PrimeReactProvider>
+  </StrictMode>
+
 )
