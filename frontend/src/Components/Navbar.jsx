@@ -1,13 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { createPortal } from 'react-dom'
-import LoginDropdown from '../Components/AuthComponents/LoginDropdown'
-import SignupDropdown from '../Components/AuthComponents/SignupDropdown'
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import LoginDropdown from '../Components/AuthComponents/LoginDropdown';
+import SignupDropdown from '../Components/AuthComponents/SignupDropdown';
 import { useAuth } from '../Components/AuthComponents/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Sidebar } from 'primereact/sidebar';
 import { IoReorderThreeOutline } from "react-icons/io5";
 import { Button } from 'primereact/button';
-import { classNames } from 'primereact/utils';
 import { IoCloseSharp } from "react-icons/io5";
 
 const Navbar = () => {
@@ -90,7 +89,7 @@ const Navbar = () => {
           </span>
           <button
             onClick={logout}
-            className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-xs font-medium cursor-pointer ml-1.4 max-sm:px-2 max-sm:py-1 max-sm:ml-0.4"
+            className="bg-red-500 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-xs font-medium cursor-pointer ml-1.4 max-sm:px-2 max-sm:py-1 max-sm:ml-0.4"
           >
             Logout
           </button>

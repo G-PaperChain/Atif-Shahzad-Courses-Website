@@ -1,7 +1,8 @@
 from app import db
 
-enrollments = db.Table(
-    "enrollments",
-    db.Column("user_id", db.Integer, db.ForeignKey("users.uid"), primary_key=True),
-    db.Column("course_id", db.Integer, db.ForeignKey("courses.course_id"), primary_key=True)
+student_course = db.Table(
+    "student_course",
+    db.Column("student_course_id", db.Integer, primary_key=True),
+    db.Column("user_id", db.Integer, db.ForeignKey("users.uid")),
+    db.Column("course_id", db.Integer, db.ForeignKey("courses.course_id"))
 )

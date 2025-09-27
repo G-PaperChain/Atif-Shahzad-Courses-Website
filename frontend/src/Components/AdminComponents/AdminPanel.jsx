@@ -1,13 +1,72 @@
-import React from 'react'
-import { useState } from 'react'
+import { useState, useEffect, useMemo, useRef, React } from 'react'
 import axios from 'axios'
 import { useAuth } from '../AuthComponents/AuthContext'
+import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
+import { useCourseContext } from '../../Context/CourseContext';
+import Courses from '../CoursesComponents/CoursesPage';
+
+// props system is copied, that is why replace it
 
 function AdminPanel() {
+    const { courses, courseCount, fetchCourses } = useCourseContext()
+    const { api } = useAuth()
+    const [file, setFile] = useState(null);
+    const [quizzes, setQuizzes] = useState([]);
+    const [error, setError] = useState([])
     const green = '#009640'
-    const handleChange = (e) => {
+    const [selectedCourseId, setSelectedCourseId] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [courseFormData, setCourseFormData] = useState({
+        course_code: '',
+        course_name: '',
+        course_description: ''
+    });
+
+
+    useEffect(() => {
+        fetchCourses()
+    }, []);
+
+    const handleAddCourseSubmit = async (e) => {
         e.preventDefault()
+        try {
+            api.post("/admin/add-course", courseFormData)
+            fetchCourses()
+            setVisible(false)
+        } catch (e) {
+            console.error("Error: " + e)
+        }
     }
+
+    const handleCourseInputChange = (e) => {
+        setCourseFormData({ ...courseFormData, [e.target.name]: e.target.value });
+    }
+
+    const handleChange = (e) => {
+        setSelectedCourseId(e.target.value);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedCourseId) {
+            setError("Please select a course first.")
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            await axios.post(`/admin/${selectedCourseId}/upload_csv`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            setError("");
+        } catch (e) {
+            setError("Upload Failed")
+            console.error(e);
+        };
+    };
 
     return (
         <div className='AdminPanel'>
@@ -63,47 +122,80 @@ function AdminPanel() {
                 </div>
             </aside>
 
-
             {/* ACTUAL CONTENT */}
-
             <div className="p-4 sm:ml-64">
-                <div className="">
 
+                <div className="">
                     {/* TOP 3 BOXES */}
                     <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div className="flex items-center justify-center h-24 rounded-sm bg-gray-50 dark:bg-green-300">
 
-                            <form>
-                                <label htmlFor="">Current Courses</label>
-                                <select name="" id="">
+                        <div className="flex items-center justify-center h-24 rounded-sm dark:bg-green-200">
+                            <select
+                                name="courses"
+                                id="course_select"
+                                value={selectedCourseId || ''}
+                                onChange={handleChange}
+                            >
+                                <option value="">-- Select Course --</option>
+                                {courses.map((course) => (
+                                    <option key={course.course_id} value={course.course_id}>
+                                        {course.course_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                                </select>
+                        <div className="flex items-center justify-center h-24 rounded-sm  dark:bg-green-200">
+
+                            <form onSubmit={handleSubmit} className="flex gap-2">
+                                <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} />
+                                <button type="submit">Upload</button>
                             </form>
 
                         </div>
-                        <div className="flex items-center justify-center h-24 rounded-sm bg-gray-50 dark:bg-gray-800">
-                            <p className="text-2xl text-gray-400 dark:text-gray-500">
-                                <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                                </svg>mid
-                            </p>
+
+                        <div className="flex items-center justify-center h-24 rounded-sm dark:bg-green-200">
+                            <div className={error ? `text-red-500` : `text-green-500`}>
+                                {error ? error : 'Ready'}
+                            </div>
                         </div>
-                        <div className="flex items-center justify-center h-24 rounded-sm bg-gray-50 dark:bg-gray-800">
-                            <p className="text-2xl text-gray-400 dark:text-gray-500">
-                                <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                                </svg>right
-                            </p>
-                        </div>
+
                     </div>
 
-
+                    {/* MID BIG DIV BOX */}
                     <div className="courses-form flex items-center justify-center h-48 mb-4 rounded-sm bg-gray-50 dark:bg-gray-800 ">
-                        <form onSubmit="">
 
-                        </form>
                     </div>
+
+                    {/* SMALL 4 BOTTOM DIV BOXES */}
                     <div className="grid grid-cols-2 gap-4 mb-4">
+
+                        <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
+                            <Button label="Add a Course" icon="pi pi-external-link" onClick={() => setVisible(true)} />
+                            <Dialog header="Add a course" visible={visible} onHide={() => { if (!visible) return; setVisible(false); }}
+                                style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
+                                <form>
+
+                                    <div className='flex gap-2'>
+                                        <label>Course Code</label>
+                                        <input name="course_code" type="text" onChange={handleCourseInputChange} value={courseFormData.course_code} required />
+                                    </div>
+
+                                    <div className='flex gap-2'>
+                                        <label>Course Name</label>
+                                        <input name="course_name" type="text" onChange={handleCourseInputChange} value={courseFormData.course_name} required />
+                                    </div>
+
+                                    <div className='flex gap-2'>
+                                        <label>Course Description <span className='text-gray-400'>optional</span></label>
+                                        <input name="course_description" type="text" onChange={handleCourseInputChange} value={courseFormData.course_description} />
+                                    </div>
+
+                                    <button type='submit'>Add Course</button>
+                                </form>
+                            </Dialog>
+                        </div>
+
                         <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
                             <p className="text-2xl text-gray-400 dark:text-gray-500">
                                 <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
@@ -111,13 +203,7 @@ function AdminPanel() {
                                 </svg>
                             </p>
                         </div>
-                        <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
-                            <p className="text-2xl text-gray-400 dark:text-gray-500">
-                                <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                                </svg>
-                            </p>
-                        </div>
+
                         <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
                             <p className="text-2xl text-gray-400 dark:text-gray-500">
                                 <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">

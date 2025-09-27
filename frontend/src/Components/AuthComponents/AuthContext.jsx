@@ -16,11 +16,11 @@ export const useAuth = () => {
   return context;
 };
 
-// Helper function to get cookies
+// Helper function to get cookies (works only if not HttpOnly)
 const getCookie = (name) => {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
+  if (parts.length === 2) return parts.pop().split(";").shift();
 };
 
 export const AuthProvider = ({ children }) => {
@@ -40,9 +40,10 @@ export const AuthProvider = ({ children }) => {
 
     // Add CSRF token to all requests
     instance.interceptors.request.use((config) => {
-      const csrfToken = getCookie('csrf_token');
-      if (csrfToken && config.method !== 'get') {
-        config.headers['X-CSRF-Token'] = csrfToken;
+      const csrfToken = getCookie("csrf_token");
+      if (csrfToken && config.method !== "get") {
+        // Adjust if backend expects a different header name
+        config.headers["X-CSRF-Token"] = csrfToken;
       }
       return config;
     });
@@ -55,10 +56,9 @@ export const AuthProvider = ({ children }) => {
       await api.post("/logout");
     } catch (err) {
       console.error("Logout API error:", err);
-      // Even if API fails, clear local state
     } finally {
       setUser(null);
-      setIsInitialized(true);
+      setIsInitialized(false); // ✅ allow re-fetch after logout
     }
   }, [api]);
 
@@ -68,7 +68,6 @@ export const AuthProvider = ({ children }) => {
       setUser(res.data.user || null);
     } catch (err) {
       console.error("fetchCurrentUser error:", err?.response?.data || err);
-
       if (err?.response?.status === 401) {
         setUser(null);
       }
@@ -81,64 +80,56 @@ export const AuthProvider = ({ children }) => {
   // Initialize auth state
   useEffect(() => {
     if (!isInitialized) {
-      // First, try to get CSRF token
-      axios.get(`${API_BASE}/csrf-token`, { withCredentials: true })
+      api
+        .get("/csrf-token")
         .then(() => {
-          // Then fetch user
           fetchCurrentUser();
         })
         .catch((error) => {
           console.error("CSRF token fetch failed:", error);
-          fetchCurrentUser(); // Still try to fetch user
+          fetchCurrentUser(); // still try to fetch user
         });
     }
-  }, [fetchCurrentUser, isInitialized, API_BASE]);
+  }, [fetchCurrentUser, isInitialized, api]);
 
-  // Auth actions
   const login = async (email, password) => {
     try {
       setLoading(true);
-      console.log('AuthContext: Attempting login for:', email);
+      console.log("AuthContext: Attempting login for:", email);
 
       const res = await api.post("/login", { email, password });
-      console.log('AuthContext: Login API response:', res.data);
+      console.log("AuthContext: Login API response:", res.data);
 
       if (res.data.user) {
         setUser(res.data.user);
-        console.log('AuthContext: Login successful, user set');
+        console.log("AuthContext: Login successful, user set");
         return { success: true, user: res.data.user };
       } else {
-        console.log('AuthContext: No user in response');
+        console.log("AuthContext: No user in response");
         return { success: false, error: "Invalid response from server" };
       }
     } catch (err) {
-      console.error('AuthContext: Login API error:', err);
-
-      // DEBUG: Log the complete error response
-      console.log('AuthContext: Complete error object:', err);
-      console.log('AuthContext: Error response data:', err?.response?.data);
-      console.log('AuthContext: Error response status:', err?.response?.status);
+      console.error("AuthContext: Login API error:", err);
 
       let errorMessage = "Login failed. Please try again.";
 
       if (err.response) {
-        // Try multiple possible error message paths
         const errorData = err.response.data;
 
-        // Check all possible error message locations
-        errorMessage = errorData?.error ||
+        errorMessage =
+          errorData?.error ||
           errorData?.message ||
-          errorData?.msg ||  // Added this line for "msg" field
+          errorData?.msg ||
           errorData?.detail ||
-          (typeof errorData === 'string' ? errorData : `Invalid credentials (${err.response.status})`);
+          (typeof errorData === "string"
+            ? errorData
+            : `Invalid credentials (${err.response.status})`);
 
-        console.log('AuthContext: Extracted error message:', errorMessage);
-
-        // If no specific message found, provide a generic one based on status code
-        if (!errorMessage || errorMessage.includes('undefined')) {
-          errorMessage = err.response.status === 401
-            ? 'Invalid email or password'
-            : `Login failed (Error ${err.response.status})`;
+        if (!errorMessage || errorMessage.includes("undefined")) {
+          errorMessage =
+            err.response.status === 401
+              ? "Invalid email or password"
+              : `Login failed (Error ${err.response.status})`;
         }
       } else if (err.request) {
         errorMessage = "No response from server. Please check your connection.";
@@ -146,11 +137,10 @@ export const AuthProvider = ({ children }) => {
         errorMessage = err.message || "An unexpected error occurred.";
       }
 
-      console.log('AuthContext: Returning error:', errorMessage);
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
-      console.log('AuthContext: Login process completed');
+      console.log("AuthContext: Login process completed");
     }
   };
 
@@ -175,7 +165,10 @@ export const AuthProvider = ({ children }) => {
         current_password,
         new_password,
       });
-      return { success: true, message: res.data?.message || "Password changed" };
+      return {
+        success: true,
+        message: res.data?.message || "Password changed",
+      };
     } catch (err) {
       const message =
         err?.response?.data?.error || err.message || "Password change failed";
@@ -195,5 +188,7 @@ export const AuthProvider = ({ children }) => {
     changePassword,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  );
 };

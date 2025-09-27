@@ -1,22 +1,35 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom';
+import { useAuth } from '../AuthComponents/AuthContext'
 
 const Courses = () => {
+    const [courses, setCourses] = useState()
+    const [error, setError] = useState()
+    const [api, fetchCurrentUser, user] = useAuth()
 
-    const courses = [
-        {
-            id: 1,
-            name: 'Computer Application'
-        },
-        {
-            id: 2,
-            name: 'Simulation'
-        },
-        {
-            id: 3,
-            name: 'Product Management'
-        },
-    ]
+    useEffect(() => {
+        fetchUserCourses();
+    }, []);
+
+    const fetchUserCourses = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await api.get(`/user/courses/${user.uid}`)
+
+            if (response.data.success) {
+                setCourses(response.data.courses);
+            } else {
+                setError(response.data.error || 'Failed to fetch courses');
+            }
+        } catch (err) {
+            console.error('Error fetching courses:', err);
+            setError(err.response?.data?.error || err.message || 'Failed to fetch courses');
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <>
@@ -31,7 +44,7 @@ const Courses = () => {
                             <h3 className="text-green-700 bg-green-300 w-max px-1.5 rounded-full mt-3">
                                 {course.course_type || '🌀core'}
                             </h3>
-                            <Link to='/course'><button className="text-md cursor-pointer text-white font-normal py-1 px-2 rounded-lg hover:bg-green-800 bg-green-700 transition-all duration-200 mt-3">
+                            <Link to={`/course/${course.course_code}`}><button className="text-md cursor-pointer text-white font-normal py-1 px-2 rounded-lg hover:bg-green-800 bg-green-700 transition-all duration-200 mt-3">
                                 View performance
                             </button>
                             </Link>

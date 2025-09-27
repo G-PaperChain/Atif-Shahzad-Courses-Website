@@ -11,6 +11,7 @@ import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
 import NCAAA_Page from './Components/NCAAA_Components/NCAAA_Page.jsx';
 import Course from './Components/CoursesComponents/Course.jsx';
 import ProtectedRoute from './Components/ProtectedRoute.jsx';
+import { CourseContextProvider } from './Context/CourseContext.jsx';
 
 const router = createBrowserRouter([
   {
@@ -36,9 +37,11 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
   <PrimeReactProvider>
     <AuthProvider>
-      <StrictMode>
-        <RouterProvider router={router} />
-      </StrictMode>
+      <CourseContextProvider>
+        <StrictMode>
+          <RouterProvider router={router} />
+        </StrictMode>
+      </CourseContextProvider>
     </AuthProvider>
   </PrimeReactProvider>
 )

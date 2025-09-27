@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState, useContext } from 'react'
-import { IoTriangle } from "react-icons/io5";
+import React, { useEffect, useState } from 'react'
 import { useAuth } from '../AuthComponents/AuthContext';
 
 const LoginDropdown = (props) => {
@@ -11,33 +10,22 @@ const LoginDropdown = (props) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError(''); // Clear previous errors
-
-        console.log('🔴 LoginDropdown: Starting login with:', formData.email);
-
+        setError('');
         try {
             const result = await login(formData.email, formData.password);
-
-            console.log('🟡 LoginDropdown: Login result:', result);
-
             if (!result.success) {
-                console.log('🔴 LoginDropdown: Setting error to:', result.error);
-                setError(result.error); // This should work now
+                setError(result.error);
             } else {
-                console.log('🟢 LoginDropdown: Login successful');
                 setFormData({ email: '', password: '' });
             }
         } catch (err) {
-            console.error('LoginDropdown: Unexpected error:', err);
             setError('An unexpected error occurred. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
-    // Add this useEffect to see when error state actually updates
     useEffect(() => {
-        console.log('🟣 LoginDropdown: Error state changed to:', error);
     }, [error]);
 
     const handleChange = (e) => {
@@ -50,7 +38,7 @@ const LoginDropdown = (props) => {
             shadow-2xl border border-gray-800 w-80
             transition-all duration-300 ease-out transform
             max-sm:px-4 max-sm:py-4 max-sm:right-3 max-sm:w-74'
-            onClick={(e) => e.stopPropagation()} // ADD THIS TO ENTIRE DROPDOWN
+            onClick={(e) => e.stopPropagation()}
         >
             <h2 className="mt-2 text-center text-xl font-bold tracking-tight z-50">
                 Sign in to your account
@@ -102,7 +90,7 @@ const LoginDropdown = (props) => {
                         <button
                             type="button"
                             onClick={(e) => {
-                                e.stopPropagation(); // STOP THE EVENT FROM BUBBLING
+                                e.stopPropagation();
                                 handleSubmit(e);
                             }}
 
@@ -117,19 +105,8 @@ const LoginDropdown = (props) => {
                     </div>
                 </form>
 
-                <button
-                    type="button"
-                    onClick={() => {
-                        console.log('🧪 Manual error test clicked');
-                        setError('Test error message: ' + new Date().toLocaleTimeString());
-                    }}
-                    className="mt-4 p-2 bg-blue-500 text-white rounded text-xs"
-                >
-                    Test Error Display
-                </button>
-
                 {error && (
-                    <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 z-50">
+                    <div className="bg-red-50 border-2 border-red-200 text-red-700 px-3 py-2 rounded-lg mb-3 z-50">
                         <div className="flex items-center">
                             <span className="text-red-500 mr-2">⚠️</span>
                             <span className="font-medium">Error:</span>
