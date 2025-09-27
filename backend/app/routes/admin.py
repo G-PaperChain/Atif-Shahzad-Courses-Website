@@ -6,7 +6,6 @@ from app.models.User import User
 from app.models.Quiz import Quiz
 from app.models.QuizMark import QuizMark
 from app.services.utils import admin_required
-import pandas as pd
 import csv
 
 admin_bp = Blueprint('admin', __name__)
