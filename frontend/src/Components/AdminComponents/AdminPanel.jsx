@@ -1,10 +1,9 @@
-import { useState, useEffect, useMemo, useRef, React } from 'react'
-import axios from 'axios'
-import { useAuth } from '../AuthComponents/AuthContext'
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useAuth } from '../AuthComponents/AuthContext';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { useCourseContext } from '../../Context/CourseContext';
-import Courses from '../CoursesComponents/CoursesPage';
 
 // props system is copied, that is why replace it
 
@@ -174,7 +173,7 @@ function AdminPanel() {
                             <Button label="Add a Course" icon="pi pi-external-link" onClick={() => setVisible(true)} />
                             <Dialog header="Add a course" visible={visible} onHide={() => { if (!visible) return; setVisible(false); }}
                                 style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
-                                <form>
+                                <form onSubmit={handleAddCourseSubmit}>
 
                                     <div className='flex gap-2'>
                                         <label>Course Code</label>

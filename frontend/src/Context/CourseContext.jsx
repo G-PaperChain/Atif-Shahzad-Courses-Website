@@ -18,8 +18,8 @@ export const useCourseContext = () => {
 };
 
 export const CourseContextProvider = ({ children }) => {
-    const [courses, setCourses] = useState()
-    const [coursesCount, setCoursesCount] = useState()
+    const [courses, setCourses] = useState([])
+    const [coursesCount, setCoursesCount] = useState(0)
     const { api } = useAuth()
 
     const fetchCourses = useCallback(async () => {
