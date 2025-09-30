@@ -12,6 +12,8 @@ import NCAAA_Page from './Components/NCAAA_Components/NCAAA_Page.jsx';
 import Course from './Components/CoursesComponents/Course.jsx';
 import ProtectedRoute from './Components/ProtectedRoute.jsx';
 import { CourseContextProvider } from './Context/CourseContext.jsx';
+import { ResearchContextProvider } from './Context/ResearchContext.jsx';
+import AboutPage from './Components/AboutComponents/AboutPage.jsx';
 
 const router = createBrowserRouter([
   {
@@ -30,7 +32,8 @@ const router = createBrowserRouter([
         )
       },
       { path: "ncaaa", element: <NCAAA_Page /> },
-      { path: "course/:course_code", element: <Course /> }
+      { path: "course/:course_code", element: <Course /> },
+      { path: "about", element: <AboutPage /> },
     ],
   },
 ]);
@@ -40,7 +43,9 @@ createRoot(document.getElementById('root')).render(
     <PrimeReactProvider>
       <AuthProvider>
         <CourseContextProvider>
-          <RouterProvider router={router} />
+          <ResearchContextProvider>
+            <RouterProvider router={router} />
+          </ResearchContextProvider>
         </CourseContextProvider>
       </AuthProvider>
     </PrimeReactProvider>

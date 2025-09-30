@@ -56,10 +56,11 @@ def create_app():
     # csrf.init_app(app)
     
     frontend_url = os.environ.get('FRONTEND_URL', 'https://dratifshahzad.com')
-    CORS(app, 
+    CORS(app,
          resources={r"/api/*": {"origins": [frontend_url]}},
          supports_credentials=True,
-         allow_headers=["Content-Type", "Authorization"])
+         allow_headers=["Content-Type", "Authorization"]
+        )
     
     migrate.init_app(app, db)
 
@@ -80,9 +81,11 @@ def create_app():
     from app.routes.courses import courses_bp
     from app.routes.ncaaa_courses import ncaaa_courses_bp
     from app.routes.admin import admin_bp
+    from app.routes.about import about_bp
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(courses_bp, url_prefix='/api')
     app.register_blueprint(ncaaa_courses_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/api')
+    app.register_blueprint(about_bp, url_prefix='/api')
 
     return app

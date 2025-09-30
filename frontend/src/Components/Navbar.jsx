@@ -144,7 +144,7 @@ const Navbar = () => {
             <Link to={'/ncaaa'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>NCAAA</li></Link>
             {user && user.role === 'admin' && (
               <Link to={'/admin'}><li className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Admin Panel</li></Link>)}
-            <Link to={'/'} className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>About</Link>
+            <Link to={'/about'} className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>About</Link>
             <Link className='text-green-600 cursor-pointer hover:text-green-800 font-semibold hover:underline transition-colors duration-200'>Contact</Link>
           </ul>
         </div>

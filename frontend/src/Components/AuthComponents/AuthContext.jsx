@@ -92,19 +92,20 @@ export const AuthProvider = ({ children }) => {
   }, [api]);
 
   // Initialize auth state
-  // useEffect(() => {
-  //   if (!isInitialized) {
-  //     api
-  //       .get("/csrf-token")
-  //       .then(() => {
-  //         fetchCurrentUser();
-  //       })
-  //       .catch((error) => {
-  //         console.error("CSRF token fetch failed:", error);
-  //         fetchCurrentUser(); // still try to fetch user
-  //       });
-  //   }
-  // }, [fetchCurrentUser, isInitialized, api]);
+  // ye hataya tha ab laga hua
+  useEffect(() => {
+    if (!isInitialized) {
+      api
+        .get("/csrf-token")
+        .then(() => {
+          fetchCurrentUser();
+        })
+        .catch((error) => {
+          console.error("CSRF token fetch failed:", error);
+          fetchCurrentUser(); // still try to fetch user
+        });
+    }
+  }, [fetchCurrentUser, isInitialized, api]);
 
   const login = async (email, password) => {
     try {
