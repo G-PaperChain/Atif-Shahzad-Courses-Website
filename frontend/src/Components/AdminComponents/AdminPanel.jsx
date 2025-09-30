@@ -5,8 +5,6 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { useCourseContext } from '../../Context/CourseContext';
 
-// props system is copied, that is why replace it
-
 function AdminPanel() {
     const { courses, courseCount, fetchCourses } = useCourseContext()
     const { api } = useAuth()
@@ -171,23 +169,25 @@ function AdminPanel() {
 
                         <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
                             <Button label="Add a Course" icon="pi pi-external-link" onClick={() => setVisible(true)} />
-                            <Dialog header="Add a course" visible={visible} onHide={() => { if (!visible) return; setVisible(false); }}
+                            <Dialog visible={visible} onHide={() => { if (!visible) return; setVisible(false); }}
                                 style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
-                                <form onSubmit={handleAddCourseSubmit}>
+                                <form onSubmit={handleAddCourseSubmit} className='bg-green-200 px-4 py-3 flex flex-col gap-1'>
+
+                                    <h1 className='self-center text-2xl'>Add a Course</h1>
 
                                     <div className='flex gap-2'>
                                         <label>Course Code</label>
-                                        <input name="course_code" type="text" onChange={handleCourseInputChange} value={courseFormData.course_code} required />
+                                        <input className='bg-white px-1 py-2' name="course_code" type="text" onChange={handleCourseInputChange} value={courseFormData.course_code} required />
                                     </div>
 
                                     <div className='flex gap-2'>
                                         <label>Course Name</label>
-                                        <input name="course_name" type="text" onChange={handleCourseInputChange} value={courseFormData.course_name} required />
+                                        <input className='bg-white px-1 py-2' name="course_name" type="text" onChange={handleCourseInputChange} value={courseFormData.course_name} required />
                                     </div>
 
                                     <div className='flex gap-2'>
                                         <label>Course Description <span className='text-gray-400'>optional</span></label>
-                                        <input name="course_description" type="text" onChange={handleCourseInputChange} value={courseFormData.course_description} />
+                                        <input className='bg-white px-1 py-2' name="course_description" type="text" onChange={handleCourseInputChange} value={courseFormData.course_description} />
                                     </div>
 
                                     <button type='submit'>Add Course</button>
