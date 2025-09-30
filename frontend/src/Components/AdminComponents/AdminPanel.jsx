@@ -132,6 +132,7 @@ function AdminPanel() {
                                 id="course_select"
                                 value={selectedCourseId || ''}
                                 onChange={handleChange}
+                                className='bg-green-700 px-2 py-1'
                             >
                                 <option value="">-- Select Course --</option>
                                 {courses.map((course) => (
@@ -145,8 +146,8 @@ function AdminPanel() {
                         <div className="flex items-center justify-center h-24 rounded-sm  dark:bg-green-200">
 
                             <form onSubmit={handleSubmit} className="flex gap-2">
-                                <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} />
-                                <button type="submit">Upload</button>
+                                <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} className='bg-gray-200 ' />
+                                <button type="submit" className='px-3 py-2 bg-green-600 hover:bg-green-700 cursor-pointer'>Upload</button>
                             </form>
 
                         </div>
@@ -167,30 +168,30 @@ function AdminPanel() {
                     {/* SMALL 4 BOTTOM DIV BOXES */}
                     <div className="grid grid-cols-2 gap-4 mb-4">
 
-                        <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
-                            <Button label="Add a Course" icon="pi pi-external-link" onClick={() => setVisible(true)} />
+                        <div className="flex items-center justify-center rounded-sm h-28 dark:bg-green-200">
+                            <Button label="Add a Course" icon="pi pi-external-link" onClick={() => setVisible(true)} className='px-3 py-2 bg-green-600 hover:bg-green-700 cursor-pointer' />
                             <Dialog visible={visible} onHide={() => { if (!visible) return; setVisible(false); }}
                                 style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
                                 <form onSubmit={handleAddCourseSubmit} className='bg-green-200 px-4 py-3 flex flex-col gap-1'>
 
-                                    <h1 className='self-center text-2xl'>Add a Course</h1>
+                                    <h1 className='self-center text-xl mb-1.5'>Add a Course</h1>
 
-                                    <div className='flex gap-2'>
+                                    <div className='flex gap-2 items-center'>
                                         <label>Course Code</label>
                                         <input className='bg-white px-1 py-2' name="course_code" type="text" onChange={handleCourseInputChange} value={courseFormData.course_code} required />
                                     </div>
 
-                                    <div className='flex gap-2'>
+                                    <div className='flex gap-2 items-center '>
                                         <label>Course Name</label>
                                         <input className='bg-white px-1 py-2' name="course_name" type="text" onChange={handleCourseInputChange} value={courseFormData.course_name} required />
                                     </div>
 
-                                    <div className='flex gap-2'>
-                                        <label>Course Description <span className='text-gray-400'>optional</span></label>
+                                    <div className='flex gap-2 items-center '>
+                                        <label>Course Description <span className='text-gray-400'>(optional)</span></label>
                                         <input className='bg-white px-1 py-2' name="course_description" type="text" onChange={handleCourseInputChange} value={courseFormData.course_description} />
                                     </div>
 
-                                    <button type='submit'>Add Course</button>
+                                    <button type='submit' className='px-3 py-2 bg-green-600 hover:bg-green-700 cursor-pointer'>Add Course</button>
                                 </form>
                             </Dialog>
                         </div>
