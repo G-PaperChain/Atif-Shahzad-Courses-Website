@@ -171,7 +171,7 @@ function AdminPanel() {
                             <Button label="Add a Course" icon="pi pi-external-link" onClick={() => setVisible(true)} className='px-3 py-2 bg-green-700 hover:bg-green-800 cursor-pointer rounded-md text-white' />
                             <Dialog visible={visible} onHide={() => { if (!visible) return; setVisible(false); }}
                                 style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
-                                <form onSubmit={handleAddCourseSubmit} className='bg-green-400 px-4 py-3 flex flex-col gap-2.5'>
+                                <form onSubmit={handleAddCourseSubmit} className='bg-blue-300 px-4 py-3 flex flex-col gap-2.5'>
 
                                     <h1 className='self-center text-2xl mb-1.5'>Add a Course</h1>
 

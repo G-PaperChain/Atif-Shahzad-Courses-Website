@@ -84,5 +84,8 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix='/api')
 
     csrf.exempt(auth_bp)
+    csrf.exempt(admin_bp)
+    csrf.exempt(courses_bp)
+    csrf.exempt(ncaaa_courses_bp)
     
     return app
