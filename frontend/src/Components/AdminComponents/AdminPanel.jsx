@@ -132,8 +132,7 @@ function AdminPanel() {
                                 id="course_select"
                                 value={selectedCourseId || ''}
                                 onChange={handleChange}
-                                className='bg-green-700 px-2 py-1'
-                            >
+                                className= 'px-2 py-1 bg-green-700 hover:bg-green-800 cursor-pointer rounded-md text-white'>
                                 <option value="">-- Select Course --</option>
                                 {courses.map((course) => (
                                     <option key={course.course_id} value={course.course_id}>
@@ -145,9 +144,9 @@ function AdminPanel() {
 
                         <div className="flex items-center justify-center h-24 rounded-sm  dark:bg-green-200">
 
-                            <form onSubmit={handleSubmit} className="flex gap-2">
-                                <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} className='bg-gray-200 ' />
-                                <button type="submit" className='px-3 py-2 bg-green-600 hover:bg-green-700 cursor-pointer'>Upload</button>
+                            <form onSubmit={handleSubmit} className="flex gap-2 flex-col">
+                                <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} className='bg-green-300 flex justify-center items-center' />
+                                <button type="submit" className='px-3 py-2 bg-green-700 hover:bg-green-800 cursor-pointer rounded-md text-white'>Upload</button>
                             </form>
 
                         </div>
@@ -161,7 +160,7 @@ function AdminPanel() {
                     </div>
 
                     {/* MID BIG DIV BOX */}
-                    <div className="courses-form flex items-center justify-center h-48 mb-4 rounded-sm bg-gray-50 dark:bg-gray-800 ">
+                    <div className="courses-form flex items-center justify-center h-48 mb-4 rounded-sm dark:bg-green-300 ">
 
                     </div>
 
@@ -169,7 +168,7 @@ function AdminPanel() {
                     <div className="grid grid-cols-2 gap-4 mb-4">
 
                         <div className="flex items-center justify-center rounded-sm h-28 dark:bg-green-200">
-                            <Button label="Add a Course" icon="pi pi-external-link" onClick={() => setVisible(true)} className='px-3 py-2 bg-green-600 hover:bg-green-700 cursor-pointer' />
+                            <Button label="Add a Course" icon="pi pi-external-link" onClick={() => setVisible(true)} className='px-3 py-2 bg-green-700 hover:bg-green-800 cursor-pointer rounded-md text-white' />
                             <Dialog visible={visible} onHide={() => { if (!visible) return; setVisible(false); }}
                                 style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
                                 <form onSubmit={handleAddCourseSubmit} className='bg-green-200 px-4 py-3 flex flex-col gap-1'>
@@ -196,7 +195,7 @@ function AdminPanel() {
                             </Dialog>
                         </div>
 
-                        <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
+                        <div className="flex items-center justify-center rounded-sm h-28 dark:bg-green-300">
                             <p className="text-2xl text-gray-400 dark:text-gray-500">
                                 <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
@@ -204,14 +203,14 @@ function AdminPanel() {
                             </p>
                         </div>
 
-                        <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
+                        <div className="flex items-center justify-center rounded-sm h-28 dark:bg-green-300">
                             <p className="text-2xl text-gray-400 dark:text-gray-500">
                                 <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
                                 </svg>
                             </p>
                         </div>
-                        <div className="flex items-center justify-center rounded-sm bg-gray-50 h-28 dark:bg-gray-800">
+                        <div className="flex items-center justify-center rounded-sm h-28 dark:bg-green-300">
                             <p className="text-2xl text-gray-400 dark:text-gray-500">
                                 <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
