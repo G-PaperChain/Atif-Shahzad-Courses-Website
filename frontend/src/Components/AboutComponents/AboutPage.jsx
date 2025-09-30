@@ -14,6 +14,7 @@ const AboutPage = () => {
 
     return (
         <div className='RESEARCHES flex flex-col gap-2.4'>
+            <h1 className='text-2xl text-green-700'>Researches</h1>
             {
                 researches.map(research => (
                     <div className='bg-green-200 text-black text-lg'>{research.title}</div>
