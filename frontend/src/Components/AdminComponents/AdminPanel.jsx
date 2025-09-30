@@ -146,7 +146,7 @@ function AdminPanel() {
 
                             <form onSubmit={handleSubmit} className="flex gap-2 flex-col">
                                 <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files[0])} className='bg-green-300 flex justify-center items-center' />
-                                <button type="submit" className='px-3 py-2 bg-green-700 hover:bg-green-800 cursor-pointer rounded-md text-white'>Upload</button>
+                                <button type="submit" className='px-3 py-2 bg-green-700 hover:bg-green-800 cursor-pointer rounded-md text-white w-max'>Upload</button>
                             </form>
 
                         </div>
@@ -160,7 +160,7 @@ function AdminPanel() {
                     </div>
 
                     {/* MID BIG DIV BOX */}
-                    <div className="courses-form flex items-center justify-center h-48 mb-4 rounded-sm dark:bg-green-300 ">
+                    <div className="courses-form flex items-center justify-center h-48 mb-4 rounded-sm dark:bg-green-200 ">
 
                     </div>
 
@@ -195,7 +195,7 @@ function AdminPanel() {
                             </Dialog>
                         </div>
 
-                        <div className="flex items-center justify-center rounded-sm h-28 dark:bg-green-300">
+                        <div className="flex items-center justify-center rounded-sm h-28 dark:bg-green-200">
                             <p className="text-2xl text-gray-400 dark:text-gray-500">
                                 <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
@@ -203,14 +203,14 @@ function AdminPanel() {
                             </p>
                         </div>
 
-                        <div className="flex items-center justify-center rounded-sm h-28 dark:bg-green-300">
+                        <div className="flex items-center justify-center rounded-sm h-28 dark:bg-green-200">
                             <p className="text-2xl text-gray-400 dark:text-gray-500">
                                 <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
                                 </svg>
                             </p>
                         </div>
-                        <div className="flex items-center justify-center rounded-sm h-28 dark:bg-green-300">
+                        <div className="flex items-center justify-center rounded-sm h-28 dark:bg-green-200">
                             <p className="text-2xl text-gray-400 dark:text-gray-500">
                                 <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
