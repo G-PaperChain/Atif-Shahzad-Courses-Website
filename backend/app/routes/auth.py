@@ -4,7 +4,7 @@ from datetime import timedelta
 from app import db, bcrypt
 from app.models.User import User
 import re
-from flask_wtf.csrf import generate_csrf
+# from flask_wtf.csrf import generate_csrf
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -24,18 +24,18 @@ def validate_password(password):
     return True
 
 
-@auth_bp.route('/csrf-token', methods=['GET'])
-def get_csrf_token():
-    token = generate_csrf()
-    response = jsonify({"csrfToken": token})
-    response.set_cookie(
-        'csrf_token',
-        token,
-        secure=True,
-        samesite='Lax',
-        max_age=3600
-    )
-    return response
+# @auth_bp.route('/csrf-token', methods=['GET'])
+# def get_csrf_token():
+#     token = generate_csrf()
+#     response = jsonify({"csrfToken": token})
+#     response.set_cookie(
+#         'csrf_token',
+#         token,
+#         secure=True,
+#         samesite='Lax',
+#         max_age=3600
+#     )
+#     return response
 
 @auth_bp.route('/register', methods=['POST'])
 def register():

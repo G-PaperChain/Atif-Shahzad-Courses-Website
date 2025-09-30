@@ -29,6 +29,30 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // const api = useMemo(() => {
+  //   const instance = axios.create({
+  //     baseURL: API_BASE,
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     withCredentials: true,
+  //   });
+
+  //   // Add CSRF token to all requests
+  //   instance.interceptors.request.use((config) => {
+  //     const csrfToken = getCookie("csrf_token");
+  //     if (csrfToken && config.method !== "get") {
+  //       // Flask-WTF expects X-CSRFToken header
+  //       config.headers["X-CSRFToken"] = csrfToken;
+  //     }
+  //     return config;
+  //   }, (error) => {
+  //     return Promise.reject(error);
+  //   });
+
+  //   return instance;
+  // }, [API_BASE]);
+
   const api = useMemo(() => {
     const instance = axios.create({
       baseURL: API_BASE,
@@ -36,18 +60,6 @@ export const AuthProvider = ({ children }) => {
         "Content-Type": "application/json",
       },
       withCredentials: true,
-    });
-
-    // Add CSRF token to all requests
-    instance.interceptors.request.use((config) => {
-      const csrfToken = getCookie("csrf_token");
-      if (csrfToken && config.method !== "get") {
-        // Flask-WTF expects X-CSRFToken header
-        config.headers["X-CSRFToken"] = csrfToken;
-      }
-      return config;
-    }, (error) => {
-      return Promise.reject(error);
     });
 
     return instance;

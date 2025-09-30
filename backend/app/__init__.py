@@ -53,7 +53,7 @@ def create_app():
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
-    csrf.init_app(app)
+    # csrf.init_app(app)
     
     frontend_url = os.environ.get('FRONTEND_URL', 'https://dratifshahzad.com')
     CORS(app, 
@@ -84,7 +84,5 @@ def create_app():
     app.register_blueprint(courses_bp, url_prefix='/api')
     app.register_blueprint(ncaaa_courses_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/api')
-
-    csrf.exempt(auth_bp)
 
     return app
