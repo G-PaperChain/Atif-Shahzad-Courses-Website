@@ -28,11 +28,12 @@ function AdminPanel() {
     const handleAddCourseSubmit = async (e) => {
         e.preventDefault()
         try {
-            api.post("/admin/add-course", courseFormData)
-            fetchCourses()
+            await api.post("/admin/add-course", courseFormData)
+            await fetchCourses()
             setVisible(false)
         } catch (e) {
             console.error("Error: " + e)
+            setError("Failed to add course: " + (e.response?.data?.error || e.message))
         }
     }
 
@@ -132,7 +133,7 @@ function AdminPanel() {
                                 id="course_select"
                                 value={selectedCourseId || ''}
                                 onChange={handleChange}
-                                className= 'px-2 py-1 bg-green-700 hover:bg-green-800 cursor-pointer rounded-md text-white'>
+                                className='px-2 py-1 bg-green-700 hover:bg-green-800 cursor-pointer rounded-md text-white'>
                                 <option value="">-- Select Course --</option>
                                 {courses.map((course) => (
                                     <option key={course.course_id} value={course.course_id}>

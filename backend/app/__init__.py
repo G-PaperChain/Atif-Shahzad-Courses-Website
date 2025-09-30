@@ -38,6 +38,8 @@ def create_app():
 
     app.config['WTF_CSRF_ENABLED'] = True
     app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+    app.config['WTF_CSRF_METHODS'] = ['POST', 'PUT', 'PATCH', 'DELETE']
+    app.config['WTF_CSRF_HEADERS'] = ['X-CSRFToken', 'X-CSRF-Token']
     
 
     # Validate env vars
@@ -84,8 +86,5 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix='/api')
 
     csrf.exempt(auth_bp)
-    csrf.exempt(admin_bp)
-    csrf.exempt(courses_bp)
-    csrf.exempt(ncaaa_courses_bp)
-    
+
     return app

@@ -42,10 +42,12 @@ export const AuthProvider = ({ children }) => {
     instance.interceptors.request.use((config) => {
       const csrfToken = getCookie("csrf_token");
       if (csrfToken && config.method !== "get") {
-        // Adjust if backend expects a different header name
-        config.headers["X-CSRF-Token"] = csrfToken;
+        // Flask-WTF expects X-CSRFToken header
+        config.headers["X-CSRFToken"] = csrfToken;
       }
       return config;
+    }, (error) => {
+      return Promise.reject(error);
     });
 
     return instance;
