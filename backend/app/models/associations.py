@@ -1,4 +1,4 @@
-from app import db
+from app.services.extenstions import db
 
 student_course = db.Table(
     "student_course",

@@ -1,4 +1,4 @@
-from app import db
+from app.services.extenstions import db
 from datetime import date
 from .associations import student_course
 
@@ -21,6 +21,10 @@ class User(db.Model):
     )
 
     quiz_marks = db.relationship("QuizMark", back_populates="student", cascade="all, delete")
+
+    refresh_tokens = db.relationship(
+        "RefreshToken", back_populates="user", cascade="all, delete-orphan"
+    )
     
     def to_dict(self):
         return {

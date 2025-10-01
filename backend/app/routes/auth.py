@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify, make_response
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
-from datetime import timedelta
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, JWTManager, get_jwt, get_jti
 from app import db, bcrypt
 from app.models.User import User
+from app.models.TokenBlackList import TokenBlocklist
 import re
-# from flask_wtf.csrf import generate_csrf
+from flask_wtf.csrf import generate_csrf
+from app.services.extenstions import limiter
+from app.models.RefreshToken import RefreshToken
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -24,20 +26,21 @@ def validate_password(password):
     return True
 
 
-# @auth_bp.route('/csrf-token', methods=['GET'])
-# def get_csrf_token():
-#     token = generate_csrf()
-#     response = jsonify({"csrfToken": token})
-#     response.set_cookie(
-#         'csrf_token',
-#         token,
-#         secure=True,
-#         samesite='Lax',
-#         max_age=3600
-#     )
-#     return response
+@auth_bp.route('/csrf-token', methods=['GET'])
+def get_csrf_token():
+    token = generate_csrf()
+    response = jsonify({"csrfToken": token})
+    response.set_cookie(
+        'csrf_token',
+        token,
+        secure=True,
+        samesite='Lax',
+        max_age=3600
+    )
+    return response
 
 @auth_bp.route('/register', methods=['POST'])
+@limiter.limit("5 per minute")
 def register():
     try:
         data = request.get_json()
@@ -76,13 +79,15 @@ def register():
         refresh_token = create_refresh_token(
             identity=str(user.uid)
         )
+
+        jti = get_jti(refresh_token)
+        db.session.add(RefreshToken(uid=user.uid, jti=jti))
+        db.session.commit()
         
         response = make_response(jsonify({
             'message': 'User registered successfully',
             'user': user.to_dict()
         }), 201)
-
-        print(f"Setting cookies for user: {user.uid}")
         
         response.set_cookie(
             'access_token_cookie',  
@@ -110,6 +115,7 @@ def register():
         return jsonify({'error': 'Registration failed'}), 500
 
 @auth_bp.route('/login', methods=['POST'])
+@limiter.limit("5 per minute")
 def login():
     try:
         data = request.get_json()
@@ -135,6 +141,10 @@ def login():
         refresh_token = create_refresh_token(
             identity=str(user.uid)
         )
+
+        jti = get_jti(refresh_token)
+        db.session.add(RefreshToken(uid=user.uid, jti=jti))
+        db.session.commit()
         
         response = make_response(jsonify({
             'message': 'Login successful',
@@ -167,21 +177,35 @@ def login():
         return jsonify({'error': 'Login failed'}), 500
 
 @auth_bp.route('/refresh', methods=['POST'])
+@limiter.limit("5 per minute")
 @jwt_required(refresh=True)
 def refresh():
     try:
         identity = get_jwt_identity()
+        jti = get_jwt()['jti'] # this is the current refresh token's jti
+
+        token_in_db = RefreshToken.query.filter_by(jti=jti, revoked=False).first()
+        if not token_in_db:
+            return jsonify({"error": "Token revoked or invalid"}), 401
+        
+        token_in_db.revoked = True
+
         user = User.query.get(int(identity))
         if not user:
             return jsonify({"error": "User not found"}), 404
 
-        
         new_access_token = create_access_token(
             identity=str(user.uid),
             additional_claims={"role": user.role}
         )
+
+        new_refresh_token = create_refresh_token(identity=str(user.uid))
+        new_jti = get_jti(new_refresh_token)
+        db.session.add(RefreshToken(uid=user.uid, jti=new_jti))
+        db.session.commit()
         
         response = make_response(jsonify({"message": "Token refreshed"}), 200)
+
         response.set_cookie(
             'access_token_cookie', 
             new_access_token, 
@@ -190,10 +214,20 @@ def refresh():
             samesite='Lax',
             max_age=900
         )
-        
+
+        response.set_cookie(
+            "refresh_token_cookie", 
+            new_refresh_token, 
+            httponly=True, 
+            secure=True, 
+            samesite="Lax", 
+            max_age=604800
+        )
+
         return response
+    
     except Exception as e:
-        print(f"Refresh error: {str(e)}")
+        db.session.rollback()
         return jsonify({"error": "Token refresh failed"}), 401
 
 @auth_bp.route('/me', methods=['GET'])
@@ -242,8 +276,26 @@ def change_password():
         return jsonify({'error': 'Password change failed'}), 500
 
 @auth_bp.route('/logout', methods=['POST'])
+@jwt_required(verify_type=False)
 def logout():
-    response = make_response(jsonify({"message": "Logged out successfully"}), 200)
-    response.set_cookie('access_token_cookie', '', expires=0)
-    response.set_cookie('refresh_token_cookie', '', expires=0)
-    return response
+    try:
+        jti = get_jwt()["jti"]
+        token_type = get_jwt()["type"]
+        identity = get_jwt_identity()
+
+        db.session.add(TokenBlocklist(jti=jti))
+
+        if token_type == "refresh" or identity:
+            RefreshToken.query.filter_by(uid=int(identity), revoked=False).update({"revoked": True})
+
+        db.session.commit()
+
+        response = make_response(jsonify({"message": "Logged out successfully"}), 200)
+        response.set_cookie('access_token_cookie', '', expires=0)
+        response.set_cookie('refresh_token_cookie', '', expires=0)
+
+        return response
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Logout failed"}), 500

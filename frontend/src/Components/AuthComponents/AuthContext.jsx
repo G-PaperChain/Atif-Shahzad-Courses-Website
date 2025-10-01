@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useState,
@@ -91,21 +91,25 @@ export const AuthProvider = ({ children }) => {
     }
   }, [api]);
 
-  // Initialize auth state
-  // ye hataya tha ab laga hua
+  // useEffect(() => {
+  //   if (!isInitialized) {
+  //     api
+  //       .get("/csrf-token")
+  //       .then(() => {
+  //         fetchCurrentUser();
+  //       })
+  //       .catch((error) => {
+  //         console.error("CSRF token fetch failed:", error);
+  //         fetchCurrentUser(); // still try to fetch user
+  //       });
+  //   }
+  // }, [fetchCurrentUser, isInitialized, api]);
+
   useEffect(() => {
     if (!isInitialized) {
-      api
-        .get("/csrf-token")
-        .then(() => {
-          fetchCurrentUser();
-        })
-        .catch((error) => {
-          console.error("CSRF token fetch failed:", error);
-          fetchCurrentUser(); // still try to fetch user
-        });
+      fetchCurrentUser();
     }
-  }, [fetchCurrentUser, isInitialized, api]);
+  }, [isInitialized]); // Only depend on isInitialized
 
   const login = async (email, password) => {
     try {

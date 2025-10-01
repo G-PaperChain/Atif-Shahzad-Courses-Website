@@ -1,4 +1,4 @@
-from app import db
+from app.services.extenstions import db
 from datetime import datetime
 from .associations import student_course
 
