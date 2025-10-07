@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, make_response
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, JWTManager, get_jwt, get_jti
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, JWTManager, get_jwt, get_jti, set_access_cookies, set_refresh_cookies
 from app import db, bcrypt
 from app.models.User import User
 from app.models.TokenBlackList import TokenBlocklist
@@ -114,64 +114,107 @@ def register():
         print(f"Registration error: {str(e)}")
         return jsonify({'error': 'Registration failed'}), 500
 
+# @auth_bp.route('/login', methods=['POST'])
+# @limiter.limit("5 per minute")
+# def login():
+#     try:
+#         data = request.get_json()
+        
+#         if not data.get('email') or not data.get('password'):
+#             return jsonify({'error': 'Email and password required'}), 400
+        
+#         email = data['email'].lower().strip()
+#         password = data['password']
+        
+#         user = User.query.filter_by(email=email).first()
+        
+#         if not user or not bcrypt.check_password_hash(user.password_hash, password):
+#             return jsonify({'error': 'Invalid credentials'}), 401
+        
+#         if not user.is_active:
+#             return jsonify({'error': 'Account deactivated'}), 401
+        
+#         access_token = create_access_token(
+#             identity=str(user.uid), 
+#             additional_claims={"role": user.role}
+#         )
+#         refresh_token = create_refresh_token(
+#             identity=str(user.uid)
+#         )
+
+#         jti = get_jti(refresh_token)
+#         db.session.add(RefreshToken(uid=user.uid, jti=jti))
+#         db.session.commit()
+        
+#         response = make_response(jsonify({
+#             'message': 'Login successful',
+#             'user': user.to_dict()
+#         }), 200)
+        
+        
+#         response.set_cookie(
+#             'access_token_cookie',  
+#             access_token, 
+#             httponly=True, 
+#             secure=True,
+#             samesite='Lax',
+#             max_age=900  
+#         )
+        
+#         response.set_cookie(
+#             'refresh_token_cookie',  
+#             refresh_token, 
+#             httponly=True,
+#             secure=True,
+#             samesite='Lax',
+#             max_age=604800  
+#         )
+        
+#         return response
+        
+#     except Exception as e:
+#         print(f"Login error: {str(e)}")
+#         return jsonify({'error': 'Login failed'}), 500
+    
 @auth_bp.route('/login', methods=['POST'])
 @limiter.limit("5 per minute")
 def login():
     try:
         data = request.get_json()
-        
         if not data.get('email') or not data.get('password'):
             return jsonify({'error': 'Email and password required'}), 400
-        
+
         email = data['email'].lower().strip()
         password = data['password']
-        
         user = User.query.filter_by(email=email).first()
-        
+
         if not user or not bcrypt.check_password_hash(user.password_hash, password):
             return jsonify({'error': 'Invalid credentials'}), 401
-        
+
         if not user.is_active:
             return jsonify({'error': 'Account deactivated'}), 401
-        
+
         access_token = create_access_token(
-            identity=str(user.uid), 
+            identity=str(user.uid),
             additional_claims={"role": user.role}
         )
-        refresh_token = create_refresh_token(
-            identity=str(user.uid)
-        )
+        refresh_token = create_refresh_token(identity=str(user.uid))
 
         jti = get_jti(refresh_token)
         db.session.add(RefreshToken(uid=user.uid, jti=jti))
         db.session.commit()
-        
-        response = make_response(jsonify({
+
+        response = jsonify({
             'message': 'Login successful',
             'user': user.to_dict()
-        }), 200)
-        
-        
-        response.set_cookie(
-            'access_token_cookie',  
-            access_token, 
-            httponly=True, 
-            secure=True,
-            samesite='Lax',
-            max_age=900  
-        )
-        
-        response.set_cookie(
-            'refresh_token_cookie',  
-            refresh_token, 
-            httponly=True,
-            secure=True,
-            samesite='Lax',
-            max_age=604800  
-        )
-        
-        return response
-        
+        })
+
+        # ✅ Use built-in helpers that add CSRF cookies automatically
+        set_access_cookies(response, access_token)
+        set_refresh_cookies(response, refresh_token)
+
+        return response, 200
+
     except Exception as e:
         print(f"Login error: {str(e)}")
         return jsonify({'error': 'Login failed'}), 500
