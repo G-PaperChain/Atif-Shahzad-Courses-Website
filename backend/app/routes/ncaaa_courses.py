@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.models.NCAAA_Course import NCAAA_Course
+from app.models.NCAAA_Courses.NCAAA_Course import NCAAA_Course
 from app.services.utils import admin_required
 
 ncaaa_courses_bp = Blueprint('ncaa_courses', __name__)

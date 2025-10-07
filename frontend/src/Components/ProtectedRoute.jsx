@@ -5,6 +5,15 @@ import { useAuth } from './AuthComponents/AuthContext';
 const ProtectedRoute = ({ children, requiredRole = null, fallback = "/" }) => {
   const { user, loading, isInitialized } = useAuth();
 
+  // just for testing and developing
+  const urlParams = new URLSearchParams(window.location.search);
+  const devBypass = urlParams.get('devAdmin');
+  
+  if (process.env.NODE_ENV === 'development' && devBypass) {
+    return children;
+  }
+
+
   if (loading || !isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">

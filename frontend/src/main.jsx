@@ -13,7 +13,10 @@ import Course from './Components/CoursesComponents/Course.jsx';
 import ProtectedRoute from './Components/ProtectedRoute.jsx';
 import { CourseContextProvider } from './Context/CourseContext.jsx';
 import { ResearchContextProvider } from './Context/ResearchContext.jsx';
+import { NcaaaCoursesContextProvider } from './Context/NcaaCourseContext.jsx';
 import AboutPage from './Components/AboutComponents/AboutPage.jsx';
+import AdminPanelNcaaaManagement from './Components/AdminComponents/AdminPanelNcaaaManagement.jsx';
+import AdminUsersManagement from './Components/AdminComponents/AdminUsersManagement.jsx';
 
 const router = createBrowserRouter([
   {
@@ -25,6 +28,10 @@ const router = createBrowserRouter([
       { path: "courses", element: <Courses /> },
       {
         path: "admin",
+        children: [
+          { index: true, path: "ncaaa-courses", element: <AdminPanelNcaaaManagement /> },
+          { path: "users", element: <AdminUsersManagement /> }
+        ],
         element: (
           <ProtectedRoute requiredRole="admin">
             <AdminPanel />
@@ -42,11 +49,13 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <PrimeReactProvider>
       <AuthProvider>
-        <CourseContextProvider>
-          <ResearchContextProvider>
-            <RouterProvider router={router} />
-          </ResearchContextProvider>
-        </CourseContextProvider>
+        <NcaaaCoursesContextProvider>
+          <CourseContextProvider>
+            <ResearchContextProvider>
+              <RouterProvider router={router} />
+            </ResearchContextProvider>
+          </CourseContextProvider>
+        </NcaaaCoursesContextProvider>
       </AuthProvider>
     </PrimeReactProvider>
   </StrictMode>

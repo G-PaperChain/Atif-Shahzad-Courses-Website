@@ -62,7 +62,6 @@ def create_app():
          allow_headers=["Content-Type", "Authorization"]
         )
     
-
     @app.route('/api/')
     def api_health_check():
         return {'status': 'API is running', 'version': '1.0'}, 200
@@ -85,12 +84,18 @@ def create_app():
     from app.routes.auth import auth_bp
     from app.routes.courses import courses_bp
     from app.routes.ncaaa_courses import ncaaa_courses_bp
-    from app.routes.admin import admin_bp
+    # from backend.app.routes.admin.admin import admin_bp
     from app.routes.about import about_bp
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(courses_bp, url_prefix='/api')
     app.register_blueprint(ncaaa_courses_bp, url_prefix='/api')
-    app.register_blueprint(admin_bp, url_prefix='/api')
     app.register_blueprint(about_bp, url_prefix='/api')
+
+    # NCAAA RELATED BLUEPRINTS
+    from app.routes.admin.admin import admin_bp
+    from app.routes.admin.admin_ncaaa import admin_ncaaa_bp
+    app.register_blueprint(admin_bp, url_prefix='/api')
+    app.register_blueprint(admin_ncaaa_bp, url_prefix='/api')
+
 
     return app

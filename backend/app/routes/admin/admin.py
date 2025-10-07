@@ -81,3 +81,4 @@ def upload_csv(course_id):
 
     db.session.commit()
     return {"message": "CSV uploaded successfully"}
+
