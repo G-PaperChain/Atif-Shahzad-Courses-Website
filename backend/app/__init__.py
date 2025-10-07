@@ -92,8 +92,8 @@ def create_app():
     app.register_blueprint(about_bp, url_prefix='/api')
 
     # NCAAA RELATED BLUEPRINTS
-    from app.routes.admin.admin import admin_bp
-    from app.routes.admin.admin_ncaaa import admin_ncaaa_bp
+    from app.routes.admin import admin_bp
+    from app.routes.admin import admin_ncaaa_bp
     app.register_blueprint(admin_bp, url_prefix='/api')
     app.register_blueprint(admin_ncaaa_bp, url_prefix='/api')
 
