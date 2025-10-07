@@ -62,16 +62,21 @@ export const AuthProvider = ({ children }) => {
       withCredentials: true, // important for cookies
     });
 
-    // Attach CSRF token to all mutating requests
     instance.interceptors.request.use(
       (config) => {
         const method = config.method?.toLowerCase();
+
         if (method && ["post", "put", "patch", "delete"].includes(method)) {
-          const csrfToken = getCookie("csrf_access_token"); // <-- correct name
+          // ✅ Use the correct cookie name
+          const csrfToken = getCookie("csrf_access_token");
+
           if (csrfToken) {
-            config.headers["X-CSRF-TOKEN"] = csrfToken; // <-- matches Flask-JWT-Extended default
+            config.headers["X-CSRF-TOKEN"] = csrfToken;
+          } else {
+            console.warn("⚠️ No csrf_access_token cookie found");
           }
         }
+
         return config;
       },
       (error) => Promise.reject(error)
@@ -79,6 +84,7 @@ export const AuthProvider = ({ children }) => {
 
     return instance;
   }, [API_BASE]);
+
 
   const logout = useCallback(async () => {
     try {
