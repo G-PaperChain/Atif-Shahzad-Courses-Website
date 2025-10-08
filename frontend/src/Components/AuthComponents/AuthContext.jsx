@@ -18,9 +18,11 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const API_BASE = "https://api.dratifshahzad.com/api";
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [csrfToken, setCsrfToken] = useState(null); // ✅ CSRF token for header
 
   // Axios instance
   const api = useMemo(() => {
@@ -32,33 +34,32 @@ export const AuthProvider = ({ children }) => {
       withCredentials: true, // ✅ send cookies automatically
     });
 
-    // Request interceptor for modifying requests
+    // Interceptor to attach CSRF token header
     instance.interceptors.request.use(
       (config) => {
         const method = config.method?.toLowerCase();
-
         if (method && ["post", "put", "patch", "delete"].includes(method)) {
-          // ✅ No need to read CSRF cookie manually
-          // Browser automatically sends HttpOnly CSRF cookie
+          if (csrfToken) {
+            config.headers["X-CSRF-TOKEN"] = csrfToken;
+          } else {
+            console.warn("⚠️ CSRF token missing, request may fail");
+          }
         }
-
         return config;
       },
       (error) => Promise.reject(error)
     );
 
     return instance;
-  }, [API_BASE]);
+  }, [API_BASE, csrfToken]);
 
-  // Logout
-  const logout = useCallback(async () => {
+  // Fetch CSRF token from backend
+  const fetchCsrfToken = useCallback(async () => {
     try {
-      await api.post("/logout");
+      const res = await api.get("/csrf-token"); // backend returns { csrfToken: "..." }
+      setCsrfToken(res.data.csrfToken);
     } catch (err) {
-      console.error("Logout API error:", err);
-    } finally {
-      setUser(null);
-      setIsInitialized(false); // allow re-fetch after logout
+      console.error("CSRF token fetch failed:", err);
     }
   }, [api]);
 
@@ -78,38 +79,28 @@ export const AuthProvider = ({ children }) => {
     }
   }, [api]);
 
-  // Initialize user
+  // Initialize app: fetch CSRF token, then user
   useEffect(() => {
     if (!isInitialized) {
-      fetchCurrentUser();
+      fetchCsrfToken().then(fetchCurrentUser);
     }
-  }, [isInitialized, fetchCurrentUser]);
+  }, [isInitialized, fetchCurrentUser, fetchCsrfToken]);
 
   // Login
   const login = async (email, password) => {
     try {
       setLoading(true);
-      console.log("AuthContext: Attempting login for:", email);
-
       const res = await api.post("/login", { email, password });
-      console.log("AuthContext: Login API response:", res.data);
-
       if (res.data.user) {
         setUser(res.data.user);
-        console.log("AuthContext: Login successful, user set");
         return { success: true, user: res.data.user };
       } else {
-        console.log("AuthContext: No user in response");
         return { success: false, error: "Invalid response from server" };
       }
     } catch (err) {
-      console.error("AuthContext: Login API error:", err);
-
       let errorMessage = "Login failed. Please try again.";
-
       if (err.response) {
         const errorData = err.response.data;
-
         errorMessage =
           errorData?.error ||
           errorData?.message ||
@@ -118,7 +109,6 @@ export const AuthProvider = ({ children }) => {
           (typeof errorData === "string"
             ? errorData
             : `Invalid credentials (${err.response.status})`);
-
         if (!errorMessage || errorMessage.includes("undefined")) {
           errorMessage =
             err.response.status === 401
@@ -130,11 +120,9 @@ export const AuthProvider = ({ children }) => {
       } else {
         errorMessage = err.message || "An unexpected error occurred.";
       }
-
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
-      console.log("AuthContext: Login process completed");
     }
   };
 
@@ -153,6 +141,18 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
+
+  // Logout
+  const logout = useCallback(async () => {
+    try {
+      await api.post("/logout");
+    } catch (err) {
+      console.error("Logout API error:", err);
+    } finally {
+      setUser(null);
+      setIsInitialized(false); // allow re-fetch after logout
+    }
+  }, [api]);
 
   // Change password
   const changePassword = async (current_password, new_password) => {
