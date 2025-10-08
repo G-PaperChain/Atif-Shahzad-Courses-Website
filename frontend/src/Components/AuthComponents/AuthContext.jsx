@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [csrfToken, setCsrfToken] = useState(null);
 
   // Axios instance
   const api = useMemo(() => {
@@ -30,37 +31,35 @@ export const AuthProvider = ({ children }) => {
       headers: {
         "Content-Type": "application/json",
       },
-      withCredentials: true, // ✅ send cookies automatically
+      withCredentials: true,
     });
 
-    // Interceptor to attach fresh CSRF token to modifying requests
-    instance.interceptors.request.use(async (config) => {
+    // Attach CSRF token for modifying requests
+    instance.interceptors.request.use((config) => {
       const method = config.method?.toLowerCase();
       if (method && ["post", "put", "patch", "delete"].includes(method)) {
-        try {
-          // Fetch fresh CSRF token from backend before the request
-          const res = await instance.get("/csrf-token");
-          const token = res.data.csrfToken;
-          config.headers["X-CSRF-TOKEN"] = token;
-        } catch (err) {
-          console.warn("⚠️ Failed to fetch CSRF token:", err);
+        if (!csrfToken) {
+          console.warn("⚠️ CSRF token missing. Request may fail.");
+        } else {
+          config.headers["X-CSRF-TOKEN"] = csrfToken;
         }
       }
       return config;
     });
 
     return instance;
-  }, [API_BASE]);
+  }, [API_BASE, csrfToken]);
 
-  // Fetch current user
+  // Fetch current user (only if cookies exist)
   const fetchCurrentUser = useCallback(async () => {
     try {
       const res = await api.get("/me");
       setUser(res.data.user || null);
     } catch (err) {
-      console.error("fetchCurrentUser error:", err?.response?.data || err);
       if (err?.response?.status === 401) {
-        setUser(null);
+        setUser(null); // not logged in
+      } else {
+        console.error("fetchCurrentUser error:", err);
       }
     } finally {
       setLoading(false);
@@ -68,46 +67,39 @@ export const AuthProvider = ({ children }) => {
     }
   }, [api]);
 
-  // Initialize app
-  useEffect(() => {
-    if (!isInitialized) {
-      fetchCurrentUser();
+  // Fetch CSRF token after login or registration
+  const fetchCsrfToken = useCallback(async () => {
+    try {
+      const res = await api.get("/csrf-token");
+      setCsrfToken(res.data.csrfToken);
+    } catch (err) {
+      console.error("Failed to fetch CSRF token:", err);
     }
-  }, [isInitialized, fetchCurrentUser]);
+  }, [api]);
 
-  // Login
+  useEffect(() => {
+    // Only fetch user if cookies exist
+    fetchCurrentUser();
+  }, [fetchCurrentUser]);
+
   const login = async (email, password) => {
     try {
       setLoading(true);
       const res = await api.post("/login", { email, password });
       if (res.data.user) {
         setUser(res.data.user);
+        await fetchCsrfToken(); // ✅ fetch CSRF token immediately after login
         return { success: true, user: res.data.user };
-      } else {
-        return { success: false, error: "Invalid response from server" };
       }
+      return { success: false, error: "Invalid response from server" };
     } catch (err) {
       let errorMessage = "Login failed. Please try again.";
       if (err.response) {
-        const errorData = err.response.data;
+        const data = err.response.data;
         errorMessage =
-          errorData?.error ||
-          errorData?.message ||
-          errorData?.msg ||
-          errorData?.detail ||
-          (typeof errorData === "string"
-            ? errorData
-            : `Invalid credentials (${err.response.status})`);
-        if (!errorMessage || errorMessage.includes("undefined")) {
-          errorMessage =
-            err.response.status === 401
-              ? "Invalid email or password"
-              : `Login failed (Error ${err.response.status})`;
-        }
-      } else if (err.request) {
-        errorMessage = "No response from server. Please check your connection.";
-      } else {
-        errorMessage = err.message || "An unexpected error occurred.";
+          data?.error ||
+          data?.message ||
+          `Invalid credentials (${err.response.status})`;
       }
       return { success: false, error: errorMessage };
     } finally {
@@ -115,48 +107,45 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register
   const register = async (userData) => {
     try {
       setLoading(true);
       const res = await api.post("/register", userData);
-      setUser(res.data.user || null);
-      return { success: true, user: res.data.user || null };
+      if (res.data.user) {
+        setUser(res.data.user);
+        await fetchCsrfToken(); // fetch CSRF token after registration
+        return { success: true, user: res.data.user };
+      }
+      return { success: false, error: "Registration failed" };
     } catch (err) {
-      const message =
-        err?.response?.data?.error || err.message || "Registration failed";
+      const message = err?.response?.data?.error || "Registration failed";
       return { success: false, error: message };
     } finally {
       setLoading(false);
     }
   };
 
-  // Logout
   const logout = useCallback(async () => {
     try {
       await api.post("/logout");
     } catch (err) {
-      console.error("Logout API error:", err);
+      console.error("Logout error:", err);
     } finally {
       setUser(null);
-      setIsInitialized(false); // allow re-fetch after logout
+      setCsrfToken(null);
+      setIsInitialized(false);
     }
   }, [api]);
 
-  // Change password
   const changePassword = async (current_password, new_password) => {
     try {
       const res = await api.post("/change-password", {
         current_password,
         new_password,
       });
-      return {
-        success: true,
-        message: res.data?.message || "Password changed",
-      };
+      return { success: true, message: res.data?.message || "Password changed" };
     } catch (err) {
-      const message =
-        err?.response?.data?.error || err.message || "Password change failed";
+      const message = err?.response?.data?.error || "Password change failed";
       return { success: false, error: message };
     }
   };
