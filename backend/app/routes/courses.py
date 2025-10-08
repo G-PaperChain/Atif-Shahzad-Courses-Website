@@ -33,7 +33,7 @@ def get_my_courses(uid):
             'error' : 'User not found'
         }), 404 # confused about it as user has logged in inside the react application so this would probably not come
     
-    courses_data = [course.todict() for course in user.courses]
+    courses_data = [course.to_dict() for course in user.courses]
 
     if not courses_data:
         return jsonify({

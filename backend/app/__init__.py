@@ -37,7 +37,7 @@ def create_app():
     app.config["JWT_ACCESS_CSRF_HEADER_NAME"] = "X-CSRF-TOKEN"
     app.config['JWT_COOKIE_SECURE'] = True
     app.config['JWT_COOKIE_HTTPONLY'] = True
-    app.config["JWT_COOKIE_DOMAIN"] = ".dratifshahzad.com"
+    app.config["JWT_COOKIE_DOMAIN"] = os.environ.get('JWT_COOKIE_DOMAIN', None)
     app.config['JWT_COOKIE_SAMESITE'] = 'Lax'
     app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token_cookie'
     app.config['JWT_REFRESH_COOKIE_NAME'] = 'refresh_token_cookie'
@@ -64,7 +64,7 @@ def create_app():
     CORS(app,
          resources={r"/api/*": {"origins": [frontend_url]}},
          supports_credentials=True,
-         allow_headers=["Content-Type", "Authorization"]
+         allow_headers=["Content-Type", "Authorization", "X-CSRF-TOKEN"]
         )
     
     @app.route('/api/')

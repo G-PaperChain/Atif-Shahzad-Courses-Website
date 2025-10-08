@@ -38,11 +38,18 @@ def add_ncaaa_course():
                     'error': f'{field} is required'
                     }), 400
 
+        if len(data['ncaaa_course_code']) > 6:
+                        return jsonify({
+                'success': False,
+                'error': 'Course Code should be less than 6 numbers'
+                }), 409
+
         if NCAAA_Course.query.filter_by(course_code=data['ncaaa_course_code']).first():
             return jsonify({
                 'success': False,
                 'error': 'Course already registered'
                 }), 409
+        
 
         course = NCAAA_Course(
             course_code=data['ncaaa_course_code'],
@@ -65,7 +72,8 @@ def add_ncaaa_course():
             'error': str(e)
              }), 500
 
-@admin_ncaaa_bp.route('/admin/ncaaa/delete-course/<int:ncaaa_course_code>')
+@admin_ncaaa_bp.route('/admin/ncaaa/delete-course/<int:ncaaa_course_code>', methods=['DELETE'])
+@admin_required
 def delete_ncaaa_course(ncaaa_course_code):
     ncaaa_course = NCAAA_Course.query.get(ncaaa_course_code)
     if ncaaa_course is None:
