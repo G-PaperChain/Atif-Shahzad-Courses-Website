@@ -17,7 +17,8 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const API_BASE = "https://api.dratifshahzad.com/api";
+  // Use Vite env when available, fallback to relative path so same-origin works on cPanel
+  const API_BASE = import.meta?.env?.VITE_API_BASE || "/api";
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -43,14 +44,21 @@ export const AuthProvider = ({ children }) => {
             // Fetch fresh CSRF token if missing
             try {
               const res = await instance.get("/csrf-token");
-              const token = res.data.csrfToken;
-              setCsrfToken(token);
-              config.headers["X-CSRF-TOKEN"] = token;
+              const token = res.data?.csrfToken;
+              if (token) setCsrfToken(token);
+              // attach common header names (server may expect one of these)
+              if (token) {
+                config.headers["X-CSRF-TOKEN"] = token;
+                config.headers["X-CSRFToken"] = token;
+                config.headers["X-XSRF-TOKEN"] = token;
+              }
             } catch (err) {
               console.warn("⚠️ Failed to fetch CSRF token:", err);
             }
           } else {
             config.headers["X-CSRF-TOKEN"] = csrfToken;
+            config.headers["X-CSRFToken"] = csrfToken;
+            config.headers["X-XSRF-TOKEN"] = csrfToken;
           }
         }
         return config;
@@ -61,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     return instance;
   }, [API_BASE, csrfToken]);
 
-  // Fetch current user after login
+  // Fetch current user after login or on mount
   const fetchCurrentUser = useCallback(async () => {
     try {
       const res = await api.get("/me");
@@ -71,8 +79,29 @@ export const AuthProvider = ({ children }) => {
       if (err?.response?.status === 401) {
         setUser(null);
       }
+    } finally {
+      setIsInitialized(true);
     }
   }, [api]);
+
+  // Get CSRF token explicitly (used on mount)
+  const fetchCsrf = useCallback(async () => {
+    try {
+      const res = await api.get("/csrf-token");
+      const token = res.data?.csrfToken;
+      if (token) setCsrfToken(token);
+    } catch (err) {
+      console.warn("fetchCsrf error:", err);
+    }
+  }, [api]);
+
+  useEffect(() => {
+    // On app load, try to fetch CSRF token and current user (same-origin required)
+    (async () => {
+      await fetchCsrf();
+      await fetchCurrentUser();
+    })();
+  }, [fetchCsrf, fetchCurrentUser]);
 
   // Login
   const login = async (email, password) => {
@@ -86,7 +115,7 @@ export const AuthProvider = ({ children }) => {
         // Fetch fresh CSRF token immediately after login
         try {
           const csrfRes = await api.get("/csrf-token");
-          setCsrfToken(csrfRes.data.csrfToken);
+          setCsrfToken(csrfRes.data?.csrfToken || null);
         } catch (err) {
           console.warn("⚠️ Failed to fetch CSRF token after login:", err);
         }
@@ -135,7 +164,7 @@ export const AuthProvider = ({ children }) => {
       // Fetch CSRF token after registration
       try {
         const csrfRes = await api.get("/csrf-token");
-        setCsrfToken(csrfRes.data.csrfToken);
+        setCsrfToken(csrfRes.data?.csrfToken || null);
       } catch (err) {
         console.warn("⚠️ Failed to fetch CSRF token after registration:", err);
       }
