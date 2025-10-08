@@ -22,7 +22,7 @@ export const NcaaaCoursesContextProvider = ({ children }) => {
     const [ncaaaCoursesCount, setNcaaaCoursesCount] = useState(0);
     const [ncaaaCoursesFetchError, setNcaaaCoursesFetchError] = useState('');
     const [ncaaaCoursesAddError, setNcaaaCoursesAddError] = useState('');
-    const { api } = useAuth();
+    const { api, csrfToken, fetchCsrfToken } = useAuth();
 
     const fetchNcaaaCourses = useCallback(async () => {
         try {
@@ -35,28 +35,44 @@ export const NcaaaCoursesContextProvider = ({ children }) => {
                 console.error(response.data.error)
             }
         } catch (err) {
-            setNcaaaCoursesFetchError('Error fetching courses:', err)
+            setNcaaaCoursesFetchError('Error fetching courses: ' + (err?.message || err))
             console.error('Error fetching courses:', err);
         }
     }, [api])
 
     const addNcaaaCourse = async (ncaaaCourse) => {
         try {
+            // Ensure we have csrf token (either in cookie or via endpoint)
+            let token = csrfToken;
+            if (!token && fetchCsrfToken) {
+                token = await fetchCsrfToken();
+            }
+
+            const headers = {};
+            if (token) {
+                // include common header names — backend should accept one of these
+                headers["X-CSRF-TOKEN"] = token;
+                headers["X-CSRFToken"] = token;
+                headers["X-XSRF-TOKEN"] = token;
+            }
+
             const response = await api.post("/admin/ncaaa/add-course", {
                 ncaaa_course_code: ncaaaCourse.courseCode,
                 ncaaa_course_name: ncaaaCourse.courseName,
                 ncaaa_course_description: ncaaaCourse.courseDescription
-            })
-            
+            }, { headers })
+
             if (response.data.success) {
-                fetchNcaaaCourses()
+                await fetchNcaaaCourses()
             } else {
                 setNcaaaCoursesAddError(response.data.error)
                 console.error(response.data.error)
             }
         } catch (err) {
-            setNcaaaCoursesAddError('Error fetching courses:', err)
-            console.error('Error fetching courses:', err);
+            // provide clearer error text for debugging
+            const message = err?.response?.data?.msg || err?.response?.data?.error || err?.message || "Error adding course";
+            setNcaaaCoursesAddError(message)
+            console.error('Error adding course:', err, 'message:', message);
         }
     };
 

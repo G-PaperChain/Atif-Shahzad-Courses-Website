@@ -17,31 +17,36 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const API_BASE = "https://api.dratifshahzad.com/api";
+  // Prefer env variable but fallback to relative /api so cookies are same-origin when possible
+  const API_BASE = import.meta?.env?.VITE_API_BASE || "/api";
 
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [csrfToken, setCsrfToken] = useState(null);
 
-  // Axios instance
+  // Axios instance configured to use axios XSRF features and credentials
   const api = useMemo(() => {
     const instance = axios.create({
       baseURL: API_BASE,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       withCredentials: true,
     });
 
-    // Attach CSRF token for modifying requests
+    // Let axios automatically read cookie named XSRF-TOKEN and send X-XSRF-TOKEN header
+    instance.defaults.xsrfCookieName = "XSRF-TOKEN";
+    instance.defaults.xsrfHeaderName = "X-XSRF-TOKEN";
+
+    // Also add interceptor to attach token if we have one (some backends expect X-CSRF-TOKEN)
     instance.interceptors.request.use((config) => {
       const method = config.method?.toLowerCase();
       if (method && ["post", "put", "patch", "delete"].includes(method)) {
-        if (!csrfToken) {
-          console.warn("⚠️ CSRF token missing. Request may fail.");
-        } else {
-          config.headers["X-CSRF-TOKEN"] = csrfToken;
+        const token = csrfToken;
+        if (token) {
+          // send common header names so backend accepts whichever it expects
+          config.headers["X-CSRF-TOKEN"] = token;
+          config.headers["X-CSRFToken"] = token;
+          config.headers["X-XSRF-TOKEN"] = token;
         }
       }
       return config;
@@ -50,37 +55,40 @@ export const AuthProvider = ({ children }) => {
     return instance;
   }, [API_BASE, csrfToken]);
 
-  // Fetch current user (only if cookies exist)
   const fetchCurrentUser = useCallback(async () => {
     try {
       const res = await api.get("/me");
       setUser(res.data.user || null);
     } catch (err) {
-      if (err?.response?.status === 401) {
-        setUser(null); // not logged in
-      } else {
-        console.error("fetchCurrentUser error:", err);
-      }
+      if (err?.response?.status === 401) setUser(null);
+      else console.error("fetchCurrentUser error:", err);
     } finally {
-      setLoading(false);
       setIsInitialized(true);
+      setLoading(false);
     }
   }, [api]);
 
-  // Fetch CSRF token after login or registration
   const fetchCsrfToken = useCallback(async () => {
     try {
+      // backend may return token in body and/or set cookie; read both
       const res = await api.get("/csrf-token");
-      setCsrfToken(res.data.csrfToken);
+      const token = res?.data?.csrfToken || null;
+      if (token) setCsrfToken(token);
+      // If cookie was set, axios will use it automatically thanks to xsrfCookieName/xsrfHeaderName
+      return token;
     } catch (err) {
-      console.error("Failed to fetch CSRF token:", err);
+      console.warn("fetchCsrfToken failed:", err);
+      return null;
     }
   }, [api]);
 
   useEffect(() => {
-    // Only fetch user if cookies exist
-    fetchCurrentUser();
-  }, [fetchCurrentUser]);
+    (async () => {
+      setLoading(true);
+      await fetchCsrfToken();
+      await fetchCurrentUser();
+    })();
+  }, [fetchCsrfToken, fetchCurrentUser]);
 
   const login = async (email, password) => {
     try {
@@ -88,7 +96,7 @@ export const AuthProvider = ({ children }) => {
       const res = await api.post("/login", { email, password });
       if (res.data.user) {
         setUser(res.data.user);
-        await fetchCsrfToken(); // ✅ fetch CSRF token immediately after login
+        await fetchCsrfToken(); // fresh token after login
         return { success: true, user: res.data.user };
       }
       return { success: false, error: "Invalid response from server" };
@@ -97,9 +105,7 @@ export const AuthProvider = ({ children }) => {
       if (err.response) {
         const data = err.response.data;
         errorMessage =
-          data?.error ||
-          data?.message ||
-          `Invalid credentials (${err.response.status})`;
+          data?.error || data?.message || `Invalid credentials (${err.response.status})`;
       }
       return { success: false, error: errorMessage };
     } finally {
@@ -113,7 +119,7 @@ export const AuthProvider = ({ children }) => {
       const res = await api.post("/register", userData);
       if (res.data.user) {
         setUser(res.data.user);
-        await fetchCsrfToken(); // fetch CSRF token after registration
+        await fetchCsrfToken();
         return { success: true, user: res.data.user };
       }
       return { success: false, error: "Registration failed" };
@@ -155,6 +161,8 @@ export const AuthProvider = ({ children }) => {
     loading,
     isInitialized,
     api,
+    csrfToken,
+    fetchCsrfToken,
     login,
     register,
     logout,
