@@ -16,65 +16,30 @@ export const useAuth = () => {
   return context;
 };
 
-// Helper function to get cookies (works only if not HttpOnly)
-const getCookie = (name) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-};
-
 export const AuthProvider = ({ children }) => {
   const API_BASE = "https://api.dratifshahzad.com/api";
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // const api = useMemo(() => {
-  //   const instance = axios.create({
-  //     baseURL: API_BASE,
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     withCredentials: true,
-  //   });
-
-  //   // Add CSRF token to all requests
-  //   instance.interceptors.request.use((config) => {
-  //     const csrfToken = getCookie("csrf_token");
-  //     if (csrfToken && config.method !== "get") {
-  //       // Flask-WTF expects X-CSRFToken header
-  //       config.headers["X-CSRFToken"] = csrfToken;
-  //     }
-  //     return config;
-  //   }, (error) => {
-  //     return Promise.reject(error);
-  //   });
-
-  //   return instance;
-  // }, [API_BASE]);
-
+  // Axios instance
   const api = useMemo(() => {
     const instance = axios.create({
       baseURL: API_BASE,
       headers: {
         "Content-Type": "application/json",
       },
-      withCredentials: true, // important for cookies
+      withCredentials: true, // ✅ send cookies automatically
     });
 
+    // Request interceptor for modifying requests
     instance.interceptors.request.use(
       (config) => {
         const method = config.method?.toLowerCase();
 
         if (method && ["post", "put", "patch", "delete"].includes(method)) {
-          // ✅ Use the correct cookie name
-          const csrfToken = getCookie("csrf_access_token");
-
-          if (csrfToken) {
-            config.headers["X-CSRF-TOKEN"] = csrfToken;
-          } else {
-            console.warn("⚠️ No csrf_access_token cookie found");
-          }
+          // ✅ No need to read CSRF cookie manually
+          // Browser automatically sends HttpOnly CSRF cookie
         }
 
         return config;
@@ -85,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     return instance;
   }, [API_BASE]);
 
-
+  // Logout
   const logout = useCallback(async () => {
     try {
       await api.post("/logout");
@@ -93,10 +58,11 @@ export const AuthProvider = ({ children }) => {
       console.error("Logout API error:", err);
     } finally {
       setUser(null);
-      setIsInitialized(false); // ✅ allow re-fetch after logout
+      setIsInitialized(false); // allow re-fetch after logout
     }
   }, [api]);
 
+  // Fetch current user
   const fetchCurrentUser = useCallback(async () => {
     try {
       const res = await api.get("/me");
@@ -112,26 +78,14 @@ export const AuthProvider = ({ children }) => {
     }
   }, [api]);
 
-  // useEffect(() => {
-  //   if (!isInitialized) {
-  //     api
-  //       .get("/csrf-token")
-  //       .then(() => {
-  //         fetchCurrentUser();
-  //       })
-  //       .catch((error) => {
-  //         console.error("CSRF token fetch failed:", error);
-  //         fetchCurrentUser(); // still try to fetch user
-  //       });
-  //   }
-  // }, [fetchCurrentUser, isInitialized, api]);
-
+  // Initialize user
   useEffect(() => {
     if (!isInitialized) {
       fetchCurrentUser();
     }
-  }, [isInitialized]); // Only depend on isInitialized
+  }, [isInitialized, fetchCurrentUser]);
 
+  // Login
   const login = async (email, password) => {
     try {
       setLoading(true);
@@ -184,6 +138,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Register
   const register = async (userData) => {
     try {
       setLoading(true);
@@ -199,6 +154,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Change password
   const changePassword = async (current_password, new_password) => {
     try {
       const res = await api.post("/change-password", {
@@ -228,7 +184,5 @@ export const AuthProvider = ({ children }) => {
     changePassword,
   };
 
-  return (
-    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

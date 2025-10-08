@@ -24,7 +24,7 @@ export const NcaaaCoursesContextProvider = ({ children }) => {
     const [ncaaaCoursesAddError, setNcaaaCoursesAddError] = useState('');
     const { api } = useAuth();
 
-    const fetchNcaaaCourses = useCallback( async () => {
+    const fetchNcaaaCourses = useCallback(async () => {
         try {
             const response = await api.get("/admin/ncaaa/get-courses")
             if (response.data.success) {
@@ -42,7 +42,12 @@ export const NcaaaCoursesContextProvider = ({ children }) => {
 
     const addNcaaaCourse = async (ncaaaCourse) => {
         try {
-            const response = await api.post("/admin/ncaaa/add-course", ncaaaCourse)
+            const response = await api.post("/admin/ncaaa/add-course", {
+                ncaaa_course_code: ncaaaCourse.courseCode,
+                ncaaa_course_name: ncaaaCourse.courseName,
+                ncaaa_course_description: ncaaaCourse.courseDescription
+            })
+            
             if (response.data.success) {
                 fetchNcaaaCourses()
             } else {

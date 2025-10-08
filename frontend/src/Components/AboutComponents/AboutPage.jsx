@@ -10,7 +10,7 @@ const AboutPage = () => {
 
     useEffect(() => {
         fetchResearches();
-    }, [api]);
+    }, []);
 
     return (
         <div className='RESEARCHES flex flex-col gap-2.4'>

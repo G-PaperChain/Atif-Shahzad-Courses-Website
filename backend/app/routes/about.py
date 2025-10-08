@@ -46,7 +46,7 @@ def get_works():
     return jsonify(
         {
             "success" : True,
-            "researches" : jsonify(works),
+            "researches" : works,
         })
 
 @about_bp.route("/orcid/researche/<put_code>", methods=["GET"])
