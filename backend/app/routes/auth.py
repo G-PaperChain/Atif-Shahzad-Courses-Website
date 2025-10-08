@@ -29,13 +29,15 @@ def validate_password(password):
 @auth_bp.route('/csrf-token', methods=['GET'])
 def get_csrf_token():
     token = generate_csrf()
-    response = jsonify({"csrfToken": token})
+    response = make_response(jsonify({"csrfToken": token}))
     response.set_cookie(
-        'csrf_token',
+        "XSRF-TOKEN",
         token,
-        secure=True,
-        samesite='Lax',
-        max_age=3600
+        domain=".dratifshahzad.com",
+        secure=True,            # requires HTTPS in prod
+        httponly=False,         # client JS must be able to read it if you rely on reading cookie
+        samesite="None",
+        max_age=3600,
     )
     return response
 

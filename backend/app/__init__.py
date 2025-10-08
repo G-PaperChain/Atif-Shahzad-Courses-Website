@@ -21,8 +21,8 @@ load_dotenv()
 migrate = Migrate()
 csrf = CSRFProtect()
 
-def create_app():
-    app = Flask(__name__)
+def create_app(config_name=None):
+    app = Flask(__name__, static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static'))
 
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
@@ -61,12 +61,22 @@ def create_app():
     csrf.init_app(app)
     migrate.init_app(app, db)
     limiter.init_app(app)
-    CORS(app,
-         resources={r"/api/*": {"origins": [frontend_url]}},
-         supports_credentials=True,
-         allow_headers=["Content-Type", "Authorization", "X-CSRF-TOKEN"]
-        )
     
+    # Production cookie/CORS settings for cross-subdomain communication
+    app.config.setdefault("SESSION_COOKIE_DOMAIN", ".dratifshahzad.com")
+    app.config.setdefault("SESSION_COOKIE_SAMESITE", "None")   # allow cross-site cookies
+    app.config.setdefault("SESSION_COOKIE_SECURE", True)       # requires HTTPS in production
+
+    # Allowed origins: list your frontend origins explicitly (no wildcard) and localhost for dev
+    allowed_origins = [
+        "https://dratifshahzad.com",
+        "https://www.dratifshahzad.com",
+        "https://api.dratifshahzad.com",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
+    CORS(app, origins=allowed_origins, supports_credentials=True)
+
     @app.route('/api/')
     def api_health_check():
         return {'status': 'API is running', 'version': '1.0'}, 200
