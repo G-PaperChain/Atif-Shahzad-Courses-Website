@@ -20,8 +20,9 @@ export const AuthProvider = ({ children }) => {
   const API_BASE = "https://api.dratifshahzad.com/api";
 
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [csrfToken, setCsrfToken] = useState(null); // fresh token after login
 
   // Axios instance
   const api = useMemo(() => {
@@ -30,29 +31,37 @@ export const AuthProvider = ({ children }) => {
       headers: {
         "Content-Type": "application/json",
       },
-      withCredentials: true, // ✅ send cookies automatically
+      withCredentials: true,
     });
 
-    // Interceptor to attach fresh CSRF token to modifying requests
-    instance.interceptors.request.use(async (config) => {
-      const method = config.method?.toLowerCase();
-      if (method && ["post", "put", "patch", "delete"].includes(method)) {
-        try {
-          // Fetch fresh CSRF token from backend before the request
-          const res = await instance.get("/csrf-token");
-          const token = res.data.csrfToken;
-          config.headers["X-CSRF-TOKEN"] = token;
-        } catch (err) {
-          console.warn("⚠️ Failed to fetch CSRF token:", err);
+    // Attach CSRF token for all modifying requests
+    instance.interceptors.request.use(
+      async (config) => {
+        const method = config.method?.toLowerCase();
+        if (method && ["post", "put", "patch", "delete"].includes(method)) {
+          if (!csrfToken) {
+            // Fetch fresh CSRF token if missing
+            try {
+              const res = await instance.get("/csrf-token");
+              const token = res.data.csrfToken;
+              setCsrfToken(token);
+              config.headers["X-CSRF-TOKEN"] = token;
+            } catch (err) {
+              console.warn("⚠️ Failed to fetch CSRF token:", err);
+            }
+          } else {
+            config.headers["X-CSRF-TOKEN"] = csrfToken;
+          }
         }
-      }
-      return config;
-    });
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
 
     return instance;
-  }, [API_BASE]);
+  }, [API_BASE, csrfToken]);
 
-  // Fetch current user
+  // Fetch current user after login
   const fetchCurrentUser = useCallback(async () => {
     try {
       const res = await api.get("/me");
@@ -62,26 +71,27 @@ export const AuthProvider = ({ children }) => {
       if (err?.response?.status === 401) {
         setUser(null);
       }
-    } finally {
-      setLoading(false);
-      setIsInitialized(true);
     }
   }, [api]);
-
-  // Initialize app
-  useEffect(() => {
-    if (!isInitialized) {
-      fetchCurrentUser();
-    }
-  }, [isInitialized, fetchCurrentUser]);
 
   // Login
   const login = async (email, password) => {
     try {
       setLoading(true);
       const res = await api.post("/login", { email, password });
+
       if (res.data.user) {
         setUser(res.data.user);
+
+        // Fetch fresh CSRF token immediately after login
+        try {
+          const csrfRes = await api.get("/csrf-token");
+          setCsrfToken(csrfRes.data.csrfToken);
+        } catch (err) {
+          console.warn("⚠️ Failed to fetch CSRF token after login:", err);
+        }
+
+        setIsInitialized(true);
         return { success: true, user: res.data.user };
       } else {
         return { success: false, error: "Invalid response from server" };
@@ -121,6 +131,16 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const res = await api.post("/register", userData);
       setUser(res.data.user || null);
+
+      // Fetch CSRF token after registration
+      try {
+        const csrfRes = await api.get("/csrf-token");
+        setCsrfToken(csrfRes.data.csrfToken);
+      } catch (err) {
+        console.warn("⚠️ Failed to fetch CSRF token after registration:", err);
+      }
+
+      setIsInitialized(true);
       return { success: true, user: res.data.user || null };
     } catch (err) {
       const message =
@@ -139,7 +159,8 @@ export const AuthProvider = ({ children }) => {
       console.error("Logout API error:", err);
     } finally {
       setUser(null);
-      setIsInitialized(false); // allow re-fetch after logout
+      setCsrfToken(null);
+      setIsInitialized(false);
     }
   }, [api]);
 
@@ -161,6 +182,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Fetch current user manually (for components)
+  const fetchUser = async () => {
+    await fetchCurrentUser();
+  };
+
   const value = {
     user,
     loading,
@@ -169,7 +195,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    fetchCurrentUser,
+    fetchCurrentUser: fetchUser,
     changePassword,
   };
 
