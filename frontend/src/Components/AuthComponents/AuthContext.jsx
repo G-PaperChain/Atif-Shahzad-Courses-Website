@@ -22,7 +22,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [csrfToken, setCsrfToken] = useState(null); // ✅ CSRF token for header
 
   // Axios instance
   const api = useMemo(() => {
@@ -34,34 +33,24 @@ export const AuthProvider = ({ children }) => {
       withCredentials: true, // ✅ send cookies automatically
     });
 
-    // Interceptor to attach CSRF token header
-    instance.interceptors.request.use(
-      (config) => {
-        const method = config.method?.toLowerCase();
-        if (method && ["post", "put", "patch", "delete"].includes(method)) {
-          if (csrfToken) {
-            config.headers["X-CSRF-TOKEN"] = csrfToken;
-          } else {
-            console.warn("⚠️ CSRF token missing, request may fail");
-          }
+    // Interceptor to attach fresh CSRF token to modifying requests
+    instance.interceptors.request.use(async (config) => {
+      const method = config.method?.toLowerCase();
+      if (method && ["post", "put", "patch", "delete"].includes(method)) {
+        try {
+          // Fetch fresh CSRF token from backend before the request
+          const res = await instance.get("/csrf-token");
+          const token = res.data.csrfToken;
+          config.headers["X-CSRF-TOKEN"] = token;
+        } catch (err) {
+          console.warn("⚠️ Failed to fetch CSRF token:", err);
         }
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
+      }
+      return config;
+    });
 
     return instance;
-  }, [API_BASE, csrfToken]);
-
-  // Fetch CSRF token from backend
-  const fetchCsrfToken = useCallback(async () => {
-    try {
-      const res = await api.get("/csrf-token"); // backend returns { csrfToken: "..." }
-      setCsrfToken(res.data.csrfToken);
-    } catch (err) {
-      console.error("CSRF token fetch failed:", err);
-    }
-  }, [api]);
+  }, [API_BASE]);
 
   // Fetch current user
   const fetchCurrentUser = useCallback(async () => {
@@ -79,12 +68,12 @@ export const AuthProvider = ({ children }) => {
     }
   }, [api]);
 
-  // Initialize app: fetch CSRF token, then user
+  // Initialize app
   useEffect(() => {
     if (!isInitialized) {
-      fetchCsrfToken().then(fetchCurrentUser);
+      fetchCurrentUser();
     }
-  }, [isInitialized, fetchCurrentUser, fetchCsrfToken]);
+  }, [isInitialized, fetchCurrentUser]);
 
   // Login
   const login = async (email, password) => {
