@@ -17,43 +17,50 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  // Prefer env variable but fallback to relative /api so cookies are same-origin when possible
-  const API_BASE = import.meta?.env?.VITE_API_BASE || "/api";
+  // explicit, stable base URL: prefer env, else detect prod hostname, else use relative /api for local dev
+  const API_BASE =
+    import.meta?.env?.VITE_API_BASE ||
+    (typeof window !== "undefined" && window.location.hostname.includes("dratifshahzad")
+      ? "https://api.dratifshahzad.com/api"
+      : "/api");
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [csrfToken, setCsrfToken] = useState(null);
 
-  // Axios instance configured to use axios XSRF features and credentials
   const api = useMemo(() => {
     const instance = axios.create({
       baseURL: API_BASE,
       headers: { "Content-Type": "application/json" },
-      withCredentials: true,
+      withCredentials: true, // crucial so cookies are sent/received across subdomains
     });
 
-    // Let axios automatically read cookie named XSRF-TOKEN and send X-XSRF-TOKEN header
+    // Let axios auto-read cookie named XSRF-TOKEN and send X-XSRF-TOKEN header if cookie exists
     instance.defaults.xsrfCookieName = "XSRF-TOKEN";
     instance.defaults.xsrfHeaderName = "X-XSRF-TOKEN";
 
-    // Also add interceptor to attach token if we have one (some backends expect X-CSRF-TOKEN)
-    instance.interceptors.request.use((config) => {
-      const method = config.method?.toLowerCase();
-      if (method && ["post", "put", "patch", "delete"].includes(method)) {
-        const token = csrfToken;
-        if (token) {
-          // send common header names so backend accepts whichever it expects
-          config.headers["X-CSRF-TOKEN"] = token;
-          config.headers["X-CSRFToken"] = token;
-          config.headers["X-XSRF-TOKEN"] = token;
-        }
-      }
-      return config;
-    });
-
     return instance;
-  }, [API_BASE, csrfToken]);
+  }, [API_BASE]);
+
+  const fetchCsrfToken = useCallback(async () => {
+    try {
+      // Server should return the token in body and (preferably) set the same cookie.
+      const res = await api.get("/csrf-token");
+      const token = res?.data?.csrfToken || null;
+      if (token) {
+        setCsrfToken(token);
+        // Make token authoritative for all future requests
+        api.defaults.headers.common["X-CSRF-TOKEN"] = token;
+        api.defaults.headers.common["X-XSRF-TOKEN"] = token;
+        api.defaults.headers.common["X-CSRFToken"] = token;
+      }
+      return token;
+    } catch (err) {
+      console.warn("fetchCsrfToken failed:", err);
+      return null;
+    }
+  }, [api]);
 
   const fetchCurrentUser = useCallback(async () => {
     try {
@@ -64,21 +71,6 @@ export const AuthProvider = ({ children }) => {
       else console.error("fetchCurrentUser error:", err);
     } finally {
       setIsInitialized(true);
-      setLoading(false);
-    }
-  }, [api]);
-
-  const fetchCsrfToken = useCallback(async () => {
-    try {
-      // backend may return token in body and/or set cookie; read both
-      const res = await api.get("/csrf-token");
-      const token = res?.data?.csrfToken || null;
-      if (token) setCsrfToken(token);
-      // If cookie was set, axios will use it automatically thanks to xsrfCookieName/xsrfHeaderName
-      return token;
-    } catch (err) {
-      console.warn("fetchCsrfToken failed:", err);
-      return null;
     }
   }, [api]);
 
@@ -87,6 +79,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       await fetchCsrfToken();
       await fetchCurrentUser();
+      setLoading(false);
     })();
   }, [fetchCsrfToken, fetchCurrentUser]);
 
@@ -96,7 +89,7 @@ export const AuthProvider = ({ children }) => {
       const res = await api.post("/login", { email, password });
       if (res.data.user) {
         setUser(res.data.user);
-        await fetchCsrfToken(); // fresh token after login
+        await fetchCsrfToken(); // refresh token after login
         return { success: true, user: res.data.user };
       }
       return { success: false, error: "Invalid response from server" };
@@ -105,7 +98,7 @@ export const AuthProvider = ({ children }) => {
       if (err.response) {
         const data = err.response.data;
         errorMessage =
-          data?.error || data?.message || `Invalid credentials (${err.response.status})`;
+          data?.error || data?.message || `Login failed (${err.response.status})`;
       }
       return { success: false, error: errorMessage };
     } finally {
